@@ -31,6 +31,7 @@ export const de: Record<keyof typeof en, string> = {
   'mode.office': 'Büro',
   'mode.home': 'Homeoffice',
   'day.work': 'Arbeitstag',
+  'day.off': 'Freier Tag',
   'day.vacation': 'Urlaub',
   'day.sick': 'Krank',
   'day.holiday': 'Feiertag',
