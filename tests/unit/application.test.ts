@@ -26,6 +26,20 @@ describe('commands', () => {
     expect(repo.saved?.entries).toHaveLength(1);
   });
 
+  it('tick gives the new day its own entry when tracking runs past midnight', async () => {
+    const now = { value: new Date(at('2026-09-27', '23:58')) };
+    const { app, repo } = testApp({ now });
+    await app.init();
+    await app.run('toggle', {}, 'manual');
+    now.value = new Date(at(d, '00:30'));
+    app.tick();
+    expect(app.state.ds.entries).toHaveLength(2);
+    expect(app.state.ds.entries[1]).toMatchObject({ start: at(d, '00:00') });
+    expect(app.state.ds.entries[1]?.end).toBeUndefined();
+    await Promise.resolve();
+    expect(repo.saved?.entries).toHaveLength(2);
+  });
+
   it('ignores a duplicate automated trigger within 60 s', async () => {
     const now = { value: new Date(at(d, '08:00')) };
     const { app } = testApp({ now });

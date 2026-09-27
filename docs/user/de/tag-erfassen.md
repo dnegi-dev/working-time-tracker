@@ -9,3 +9,5 @@
 Vergessen zu stempeln? **+ Eintrag hinzufügen** → Von/Bis. Einträge antippen zum Ändern oder Löschen.
 
 **Pausen:** Ist _Gesetzliche Pausen abziehen_ aktiv, werden ab 6 Std. 30 Min. und ab 9 Std. 45 Min. abgezogen – abzüglich bereits genommener Pausen (Lücken ab 15 Min.).
+
+**Über Mitternacht:** Läuft die Erfassung über Mitternacht, wird der Eintrag um 00:00 geteilt – jeder Tag bekommt seine eigenen Stunden.

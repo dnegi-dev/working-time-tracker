@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   runningEntry,
+  splitAtMidnight,
   startEntry,
   stopEntry,
   switchLocation,
@@ -83,5 +84,24 @@ describe('tracking', () => {
     );
     expect(ds.current.mode).toBe('office');
     expect(ds.entries).toHaveLength(0);
+  });
+
+  it('splits a running entry at each midnight it crossed', () => {
+    let n = 0;
+    const id = () => `n${++n}`;
+    const ds = startEntry(
+      dataset(),
+      { projectId: 'p1', source: 'nfc' },
+      at('2026-09-26', '23:00'),
+      'a',
+    );
+    expect(splitAtMidnight(ds, at('2026-09-26', '23:30'), id)).toBe(ds);
+    const out = splitAtMidnight(ds, at(d, '00:10'), id);
+    expect(out.entries).toMatchObject([
+      { id: 'a', start: at('2026-09-26', '23:00'), end: at('2026-09-27', '00:00') },
+      { id: 'n1', start: at('2026-09-27', '00:00'), end: at(d, '00:00'), projectId: 'p1' },
+      { id: 'n2', start: at(d, '00:00'), projectId: 'p1', source: 'nfc' },
+    ]);
+    expect(runningEntry(out)?.id).toBe('n2');
   });
 });
