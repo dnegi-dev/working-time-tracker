@@ -1,0 +1,8 @@
+dist
+coverage
+package-lock.json
+public/api/openapi.json
+public/holidays
+ios
+playwright-report
+test-results
