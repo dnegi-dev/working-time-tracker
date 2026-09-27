@@ -30,6 +30,7 @@ export const en = {
   'mode.office': 'Office',
   'mode.home': 'Home',
   'day.work': 'Workday',
+  'day.off': 'Day off',
   'day.vacation': 'Vacation',
   'day.sick': 'Sick',
   'day.holiday': 'Holiday',

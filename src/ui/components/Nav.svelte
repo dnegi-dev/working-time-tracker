@@ -7,7 +7,7 @@
     { path: 'today', key: 'nav.today', icon: '◷' },
     { path: 'overview', key: 'nav.overview', icon: '▦' },
     { path: 'projects', key: 'nav.projects', icon: '▤' },
-    { path: 'settings', key: 'nav.settings', icon: '⚙' },
+    { path: 'settings', key: 'nav.settings', icon: '⚙\uFE0E' },
   ] as const;
   const active = $derived(router.route.name === 'project' ? 'projects' : router.route.name);
 </script>
