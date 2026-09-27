@@ -1,0 +1,700 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Working Time – Command API",
+    "version": "1",
+    "description": "Every command is also a deep link. In the browser, calls are executed by the service worker in an open, logged-in app tab — open the app in another tab, then use \"Try it out\". Commands change state although they are GET, so they work as plain links (NFC, QR, Shortcuts)."
+  },
+  "servers": [
+    {
+      "url": "v1"
+    }
+  ],
+  "paths": {
+    "/clock-in": {
+      "get": {
+        "operationId": "clock-in",
+        "summary": "Start working (no-op if already running)",
+        "description": "Deep link: `wtt://clock-in?…` (iOS app) · `<app>#/do/clock-in?…` (web/PWA)",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "query",
+            "required": false,
+            "description": "Project id or name",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "place",
+            "in": "query",
+            "required": false,
+            "description": "Place (\"Building / Room\") id or name",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "description": "Used when no place is given",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "office",
+                "home"
+              ]
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "description": "What triggered the call",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nfc",
+                "qr",
+                "geofence",
+                "shortcut"
+              ]
+            }
+          }
+        ],
+        "x-deeplink": {
+          "native": "wtt://clock-in",
+          "web": "#/do/clock-in"
+        },
+        "responses": {
+          "200": {
+            "description": "Done",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown project/place",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No app tab open to execute the call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clock-out": {
+      "get": {
+        "operationId": "clock-out",
+        "summary": "Stop working (no-op if not running)",
+        "description": "Deep link: `wtt://clock-out?…` (iOS app) · `<app>#/do/clock-out?…` (web/PWA)",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "description": "What triggered the call",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nfc",
+                "qr",
+                "geofence",
+                "shortcut"
+              ]
+            }
+          }
+        ],
+        "x-deeplink": {
+          "native": "wtt://clock-out",
+          "web": "#/do/clock-out"
+        },
+        "responses": {
+          "200": {
+            "description": "Done",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown project/place",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No app tab open to execute the call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/toggle": {
+      "get": {
+        "operationId": "toggle",
+        "summary": "Start if stopped, stop if running — ideal for one NFC tag",
+        "description": "Deep link: `wtt://toggle?…` (iOS app) · `<app>#/do/toggle?…` (web/PWA)",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "query",
+            "required": false,
+            "description": "Project id or name",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "place",
+            "in": "query",
+            "required": false,
+            "description": "Place (\"Building / Room\") id or name",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "description": "Used when no place is given",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "office",
+                "home"
+              ]
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "description": "What triggered the call",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nfc",
+                "qr",
+                "geofence",
+                "shortcut"
+              ]
+            }
+          }
+        ],
+        "x-deeplink": {
+          "native": "wtt://toggle",
+          "web": "#/do/toggle"
+        },
+        "responses": {
+          "200": {
+            "description": "Done",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown project/place",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No app tab open to execute the call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/switch-project": {
+      "get": {
+        "operationId": "switch-project",
+        "summary": "Continue working on another project",
+        "description": "Deep link: `wtt://switch-project?…` (iOS app) · `<app>#/do/switch-project?…` (web/PWA)",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "query",
+            "required": true,
+            "description": "Project id or name",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "x-deeplink": {
+          "native": "wtt://switch-project",
+          "web": "#/do/switch-project"
+        },
+        "responses": {
+          "200": {
+            "description": "Done",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown project/place",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No app tab open to execute the call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/switch-place": {
+      "get": {
+        "operationId": "switch-place",
+        "summary": "Change building/room (office or home follows the place)",
+        "description": "Deep link: `wtt://switch-place?…` (iOS app) · `<app>#/do/switch-place?…` (web/PWA)",
+        "parameters": [
+          {
+            "name": "place",
+            "in": "query",
+            "required": true,
+            "description": "Place id or \"Building / Room\"",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "x-deeplink": {
+          "native": "wtt://switch-place",
+          "web": "#/do/switch-place"
+        },
+        "responses": {
+          "200": {
+            "description": "Done",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown project/place",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No app tab open to execute the call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/add-note": {
+      "get": {
+        "operationId": "add-note",
+        "summary": "Add a note to a day, or to a project if given",
+        "description": "Deep link: `wtt://add-note?…` (iOS app) · `<app>#/do/add-note?…` (web/PWA)",
+        "parameters": [
+          {
+            "name": "text",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "project",
+            "in": "query",
+            "required": false,
+            "description": "Project id or name",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "description": "Defaults to today",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            }
+          }
+        ],
+        "x-deeplink": {
+          "native": "wtt://add-note",
+          "web": "#/do/add-note"
+        },
+        "responses": {
+          "200": {
+            "description": "Done",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown project/place",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No app tab open to execute the call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mark-day": {
+      "get": {
+        "operationId": "mark-day",
+        "summary": "Mark a day as vacation, sick or holiday (none removes the mark)",
+        "description": "Deep link: `wtt://mark-day?…` (iOS app) · `<app>#/do/mark-day?…` (web/PWA)",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "vacation",
+                "sick",
+                "holiday",
+                "none"
+              ]
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "description": "Defaults to today",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            }
+          }
+        ],
+        "x-deeplink": {
+          "native": "wtt://mark-day",
+          "web": "#/do/mark-day"
+        },
+        "responses": {
+          "200": {
+            "description": "Done",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown project/place",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No app tab open to execute the call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/status": {
+      "get": {
+        "operationId": "status",
+        "summary": "Current state and today’s hours (read-only)",
+        "description": "Deep link: `wtt://status?…` (iOS app) · `<app>#/do/status?…` (web/PWA)",
+        "parameters": [],
+        "x-deeplink": {
+          "native": "wtt://status",
+          "web": "#/do/status"
+        },
+        "responses": {
+          "200": {
+            "description": "Done",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown project/place",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No app tab open to execute the call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "running": {
+                "type": "boolean"
+              },
+              "since": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "project": {
+                "type": "string"
+              },
+              "place": {
+                "type": "string"
+              },
+              "mode": {
+                "enum": [
+                  "office",
+                  "home"
+                ]
+              },
+              "todayMinutes": {
+                "type": "integer"
+              },
+              "remainingTodayMinutes": {
+                "type": "integer"
+              },
+              "ignored": {
+                "type": "string",
+                "description": "Set when a duplicate trigger was ignored"
+              }
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "const": false
+          },
+          "status": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
