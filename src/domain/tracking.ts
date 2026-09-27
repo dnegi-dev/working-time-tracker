@@ -1,4 +1,4 @@
-import { dateOf } from './time.ts';
+import { addDays, dateOf, parseISODate } from './time.ts';
 import { runningEntry } from './entries.ts';
 import type { Current, Dataset, Instant, Mode, Source, TimeEntry } from './types.ts';
 
@@ -97,4 +97,20 @@ export function switchPlace(
     id,
     source,
   );
+}
+
+/** Split a running entry at each local midnight it crossed, so every day gets its own time. */
+export function splitAtMidnight(ds: Dataset, now: Instant, newId: () => string): Dataset {
+  let out = ds;
+  for (
+    let run = runningEntry(out);
+    run && dateOf(run.start) < dateOf(now);
+    run = runningEntry(out)
+  ) {
+    const midnight = parseISODate(addDays(dateOf(run.start), 1)).toISOString();
+    const stopped = stopEntry(out, midnight);
+    const next: TimeEntry = { ...run, id: newId(), start: midnight };
+    out = { ...stopped, entries: [...stopped.entries, next] };
+  }
+  return out;
 }

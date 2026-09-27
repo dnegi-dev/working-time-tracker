@@ -10,4 +10,6 @@ Forgot to clock in? **+ Add entry** → enter from/to. Tap any entry to change t
 
 **Breaks:** if _Settings → Deduct legal breaks_ is on, the app deducts 30 min after 6 h and 45 min after 9 h — minus breaks you already took (gaps of 15 min or more between entries).
 
+**Past midnight:** if you keep tracking past midnight, the entry is split at 00:00 so each day gets its own hours.
+
 **Result:** Today and Overview show your hours; the entries are saved on the device.

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   emptyDataset,
+  splitAtMidnight,
   type Dataset,
   type ISODate,
   type Instant,
@@ -65,6 +66,12 @@ export function createApp(deps: AppDeps) {
     return queue;
   }
 
+  /** Give each day its own time when tracking runs past midnight. */
+  function rollover(): Promise<void> {
+    const ds = splitAtMidnight(state.ds, deps.clock.now().toISOString(), newId);
+    return ds === state.ds ? queue : commit(ds);
+  }
+
   async function run(name: string, raw: Record<string, string>, source: Source) {
     if (!isCommand(name)) {
       return { ok: false, status: 404, error: `Unknown command: ${name}` } as CommandResult;
@@ -74,6 +81,7 @@ export function createApp(deps: AppDeps) {
     if (!parsed.success) {
       return { ok: false, status: 400, error: z.prettifyError(parsed.error) } as CommandResult;
     }
+    await rollover();
     const now = deps.clock.now();
     const auto = def.debounce && source !== 'manual';
     const last = state.ds.lastTrigger;
@@ -99,11 +107,13 @@ export function createApp(deps: AppDeps) {
     },
     async init() {
       emit({ ds: (await repo.load()) ?? state.ds });
+      await rollover();
       await ensureYear(state.now.getFullYear());
     },
     run,
     ensureYear,
     update(fn: Mutation) {
+      void rollover();
       const before = state.ds.settings;
       const ds = fn(state.ds, deps.clock.now().toISOString(), newId);
       const regionChanged =
@@ -123,6 +133,7 @@ export function createApp(deps: AppDeps) {
       await commit(state.ds);
     },
     tick() {
+      void rollover();
       emit({});
     },
   };
