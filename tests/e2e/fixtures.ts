@@ -34,6 +34,30 @@ export class AppPage {
     return this.page.getByTestId(`nav-${name}`).click();
   }
 
+  /** Slide the workday knob to the end and hold it there. */
+  async slide() {
+    const knob = this.page.getByTestId('toggle');
+    const before = await knob.textContent();
+    const k = (await knob.boundingBox())!;
+    const t = (await knob.locator('..').boundingBox())!;
+    await this.page.mouse.move(k.x + k.width / 2, k.y + k.height / 2);
+    await this.page.mouse.down();
+    await this.page.mouse.move(t.x + t.width, k.y + k.height / 2, { steps: 8 });
+    await expect(knob).not.toHaveText(before ?? '', { timeout: 3000 });
+    await this.page.mouse.up();
+  }
+
+  /** Drag the project wheel: 'down' brings the project above into the middle, 'up' the one below. */
+  async swipeProject(dir: 'down' | 'up') {
+    const box = (await this.page.getByTestId('project-current').boundingBox())!;
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    await this.page.mouse.move(x, y);
+    await this.page.mouse.down();
+    await this.page.mouse.move(x, y + (dir === 'down' ? 60 : -60), { steps: 6 });
+    await this.page.mouse.up();
+  }
+
   async addProject(name: string) {
     await this.nav('projects');
     await this.page.getByTestId('project-name').fill(name);

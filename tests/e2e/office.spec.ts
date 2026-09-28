@@ -29,7 +29,7 @@ test('office days count and places set the mode', async ({ app, page }) => {
   await page.getByRole('button', { name: 'Add' }).first().click();
   await app.nav('today');
   await page.getByTestId('place-select').selectOption({ label: 'HQ / 3.14 · Office' });
-  await page.getByTestId('toggle').click();
+  await app.slide();
   await app.nav('overview');
   await expect(page.getByTestId('quota-month')).toContainText('1 of');
 });
@@ -40,7 +40,7 @@ test('several places per day split the entry when enabled', async ({ app, page }
   await page.getByTestId('multi-place').check();
   await app.nav('today');
   await page.getByTestId('place-select').selectOption('home');
-  await page.getByTestId('toggle').click();
+  await app.slide();
   await app.setTime('2026-09-28', '11:00');
   await page.getByTestId('place-select').selectOption('office');
   await expect(page.getByTestId('entries').locator('li')).toHaveCount(2);

@@ -5,6 +5,7 @@
 import { mount } from 'svelte';
 import { registerSW } from 'virtual:pwa-register';
 import { isNative, inAppContext, redirectToApp } from './adapters/automation/openInApp.ts';
+import { haptic } from './adapters/device/haptics.ts';
 import { formatReport } from './adapters/export/formatters.ts';
 import { saveFile } from './adapters/export/download.ts';
 import { holidayProvider } from './adapters/holidays/provider.ts';
@@ -44,6 +45,7 @@ const platform: Platform = {
   saveFile,
   formatReport,
   redirectToApp,
+  haptic: haptic(native),
   async useStorage(setting, pick) {
     const repo = await repositoryFor(setting, native, pick);
     if (!repo) return false;

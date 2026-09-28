@@ -1,16 +1,10 @@
 <script lang="ts">
-  import { switchLocation, switchProject, type Mode } from '../../domain/index.ts';
+  import { switchLocation, type Mode } from '../../domain/index.ts';
   import { placeLabel } from '../../application/status.ts';
   import { useUi } from '../state/context.svelte.ts';
 
   const ui = useUi();
   const ds = $derived(ui.s.ds);
-  const projects = $derived(ds.projects.filter((p) => !p.archived));
-
-  function setProject(e: Event) {
-    const v = (e.target as HTMLSelectElement).value || undefined;
-    void ui.app.update((d, now, id) => switchProject(d, v, now, id(), 'manual'));
-  }
 
   function setPlace(e: Event) {
     const v = (e.target as HTMLSelectElement).value;
@@ -21,13 +15,6 @@
 </script>
 
 <div class="bar">
-  <label class="field">
-    {ui.t('today.project')}
-    <select value={ds.current.projectId ?? ''} onchange={setProject} data-testid="project-select">
-      <option value="">{ui.t('project.none')}</option>
-      {#each projects as p (p.id)}<option value={p.id}>{p.name}</option>{/each}
-    </select>
-  </label>
   <label class="field">
     {ui.t('today.place')}
     <select
@@ -47,7 +34,7 @@
 <style>
   .bar {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 12px;
   }
   select {
