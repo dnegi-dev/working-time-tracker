@@ -56,3 +56,53 @@ test('the focus round length is a setting', async ({ app, page }) => {
   await expect(page.getByTestId('focus-bubble')).toHaveAttribute('data-focus', '0.60');
   await expect(page.getByTestId('focus-bubble')).toHaveAttribute('data-full', 'false');
 });
+
+test('during a break a project can be queued for afterwards', async ({ app, page }) => {
+  await app.dragTo('Apollo');
+  await app.slide();
+  await app.setTime('2026-09-28', '08:20');
+  await app.dragTo('break');
+  await app.queue('Zeus');
+  await expect(page.getByTestId('break-next')).toHaveText('Next: Zeus');
+  await expect(page.getByTestId('orbit').filter({ hasText: 'Zeus' })).toHaveAttribute(
+    'data-queued',
+    'true',
+  );
+  await app.dragTo('Zeus');
+  await expect(page.getByTestId('focus-bubble')).toHaveAttribute('data-state', 'running');
+  await expect(page.getByTestId('project-current')).toHaveText('Zeus');
+});
+
+async function breakFrom830To840(app: import('./fixtures.ts').AppPage, counts: string) {
+  await app.nav('settings');
+  await app.page.getByTestId('break-counts').selectOption(counts);
+  await app.nav('today');
+  await app.dragTo('Apollo');
+  await app.slide();
+  await app.setTime('2026-09-28', '08:30');
+  await app.dragTo('break');
+  await app.setTime('2026-09-28', '08:40');
+}
+
+test('break time can count for the project after the break', async ({ app, page }) => {
+  await breakFrom830To840(app, 'after');
+  await expect(page.getByTestId('project-total')).toHaveText('0:30');
+  await app.dragTo('Zeus');
+  await expect(page.getByTestId('project-total')).toHaveText('0:10');
+  await expect(page.getByTestId('orbit').filter({ hasText: 'Apollo' })).toContainText('0:30');
+  await expect(page.getByTestId('today-total')).toHaveText('0:40');
+});
+
+test('break time can be a regular pause', async ({ app, page }) => {
+  await breakFrom830To840(app, 'pause');
+  await expect(page.getByTestId('toggle')).toHaveText('Start');
+  await expect(page.getByTestId('focus-bubble')).toHaveAttribute('data-state', 'break');
+  await expect(page.getByTestId('today-total')).toHaveText('0:30');
+  await app.queue('Zeus');
+  await app.dragTo('Zeus');
+  await expect(page.getByTestId('toggle')).toHaveText('Stop');
+  await expect(page.getByTestId('project-current')).toHaveText('Zeus');
+  await app.setTime('2026-09-28', '08:50');
+  await expect(page.getByTestId('today-total')).toHaveText('0:40');
+  await expect(page.getByTestId('orbit').filter({ hasText: 'Apollo' })).toContainText('0:30');
+});

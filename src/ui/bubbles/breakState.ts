@@ -4,6 +4,10 @@ import type { Instant } from '../../domain/index.ts';
 export interface BreakState {
   since?: Instant;
   lastEnd?: Instant;
+  /** Project worked on when the break began. */
+  from?: string;
+  /** Project queued to come after the break. */
+  next?: string;
 }
 
 const KEY = 'wtt:break';

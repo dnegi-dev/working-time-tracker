@@ -32,6 +32,7 @@ export const de: Record<keyof typeof en, string> = {
   'bubbles.focus': '{elapsed} von {total} Min. Fokus',
   'bubbles.full': 'Zeit für eine Pause',
   'bubbles.more': 'Weitere Projekte',
+  'bubbles.next': 'Danach: {name}',
   'entry.add': 'Eintrag hinzufügen',
   'entry.from': 'Von',
   'entry.to': 'Bis',
@@ -75,6 +76,10 @@ export const de: Record<keyof typeof en, string> = {
   'settings.language': 'Sprache',
   'settings.hoursPerDay': 'Stunden pro Wochentag',
   'settings.focusMinutes': 'Fokusrunde (Minuten)',
+  'settings.breakCounts': 'Pausenzeit zählt für',
+  'settings.breakBefore': 'das Projekt vor der Pause',
+  'settings.breakAfter': 'das Projekt nach der Pause',
+  'settings.breakPause': 'nichts (normale Pause)',
   'settings.breakRule':
     'Gesetzliche Pausen abziehen ({a} Min. ab 6 Std., {b} Min. ab 9 Std.), falls nicht genommen',
   'settings.office': 'Büro & Orte',

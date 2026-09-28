@@ -69,6 +69,19 @@
       data-testid="focus-minutes"
     />
   </label>
+  <label class="field">
+    {ui.t('settings.breakCounts')}
+    <select
+      value={st.breakCounts}
+      onchange={(e) =>
+        set({ breakCounts: (e.target as HTMLSelectElement).value as Settings['breakCounts'] })}
+      data-testid="break-counts"
+    >
+      <option value="before">{ui.t('settings.breakBefore')}</option>
+      <option value="after">{ui.t('settings.breakAfter')}</option>
+      <option value="pause">{ui.t('settings.breakPause')}</option>
+    </select>
+  </label>
 </div>
 
 <style>

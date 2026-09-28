@@ -76,6 +76,8 @@ export interface Settings {
   storage: StorageSetting;
   /** Length of one focus round (pomodoro) in minutes. */
   focusMinutes: number;
+  /** Where the time of a bubble break goes. */
+  breakCounts: 'before' | 'after' | 'pause';
 }
 
 export interface Current {

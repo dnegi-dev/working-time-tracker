@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { formatMinutes, type Focus } from '../../domain/index.ts';
-  import { useUi } from '../state/context.svelte.ts';
+  import type { Focus } from '../../domain/index.ts';
+  import FocusLabel from './FocusLabel.svelte';
+  import HoldRing from './HoldRing.svelte';
   import type { Point } from './layout.ts';
   import Water from './Water.svelte';
 
@@ -14,7 +15,9 @@
     total,
     mode,
     breakMinutes,
+    next,
     dragging,
+    targeted,
   }: {
     at: Point;
     r: number;
@@ -24,10 +27,11 @@
     total: number;
     mode: FocusState;
     breakMinutes: number;
+    next?: string;
     dragging: boolean;
+    targeted: boolean;
   } = $props();
 
-  const ui = useUi();
   const full = $derived(mode === 'running' && !!focus?.full);
   const level = $derived(mode === 'break' ? 0 : (focus?.ratio ?? 0));
 </script>
@@ -36,6 +40,7 @@
   class="focus {mode}"
   class:full
   class:dragging
+  class:targeted
   style:width="{2 * r}px"
   style:height="{2 * r}px"
   style:transform="translate({at.x - r}px, {at.y - r}px)"
@@ -46,27 +51,19 @@
 >
   <div class="body">
     <Water {level} moving={mode === 'running'} />
-    <div class="label">
-      {#if mode === 'break'}
-        <span class="title">{ui.t('bubbles.break')}</span>
-        <span class="big num" data-testid="break-time">{formatMinutes(breakMinutes)}</span>
-        <span class="small">
-          <span data-testid="project-current">{name}</span>
-          <span class="num" data-testid="project-total">{formatMinutes(minutes)}</span>
-        </span>
-      {:else}
-        <span class="name" data-testid="project-current">{name}</span>
-        <span class="big num" data-testid="project-total">{formatMinutes(minutes)}</span>
-        {#if focus}
-          <span class="small">
-            {full
-              ? ui.t('bubbles.full')
-              : ui.t('bubbles.focus', { elapsed: String(focus.elapsed), total: String(total) })}
-          </span>
-        {/if}
-      {/if}
-    </div>
+    <FocusLabel
+      onBreak={mode === 'break'}
+      stopped={mode === 'stopped'}
+      {full}
+      {name}
+      {minutes}
+      {focus}
+      {total}
+      {breakMinutes}
+      {next}
+    />
   </div>
+  <HoldRing active={targeted} />
 </div>
 
 <style>
@@ -107,6 +104,9 @@
     border-color: var(--line);
     box-shadow: none;
   }
+  .targeted .body {
+    scale: 1.06;
+  }
   .dragging .body {
     scale: 0.55;
     opacity: 0.92;
@@ -121,47 +121,6 @@
     animation:
       bob 5s ease-in-out infinite,
       pulse 2.4s ease-out infinite;
-  }
-  .label {
-    position: absolute;
-    inset: 0;
-    padding: 14%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 2px;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  .name,
-  .title {
-    font-weight: 600;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .big {
-    font-size: 1.8rem;
-    font-weight: 700;
-    line-height: 1.1;
-  }
-  .small {
-    font-size: 0.72rem;
-    color: var(--muted);
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .full .small {
-    color: var(--warn);
-    font-weight: 600;
-  }
-  .stopped .label {
-    color: var(--muted);
   }
   @keyframes bob {
     0%,
