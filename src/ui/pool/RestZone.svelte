@@ -61,6 +61,9 @@
     height: calc(2 * var(--r));
     pointer-events: none;
   }
+  .targeted {
+    z-index: 4;
+  }
   .attic {
     --tone: color-mix(in srgb, #8b5e34 75%, var(--muted));
   }

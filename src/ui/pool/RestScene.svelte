@@ -24,7 +24,7 @@
   .scene {
     --sand: color-mix(in srgb, #d8bf85 55%, var(--surface));
     --wood: color-mix(in srgb, #8b5e34 45%, var(--surface));
-    --cloud: color-mix(in srgb, #ffffff 70%, var(--calm) 12%);
+    --cloud: color-mix(in srgb, var(--calm) 28%, var(--surface));
     --u: calc(var(--strip, 64px) / 64);
     position: absolute;
     inset: 0;
