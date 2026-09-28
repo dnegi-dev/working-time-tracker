@@ -6,10 +6,9 @@
   const tabs = [
     { path: 'today', key: 'nav.today', icon: '◷' },
     { path: 'overview', key: 'nav.overview', icon: '▦' },
-    { path: 'projects', key: 'nav.projects', icon: '▤' },
     { path: 'settings', key: 'nav.settings', icon: '⚙\uFE0E' },
   ] as const;
-  const active = $derived(router.route.name === 'project' ? 'projects' : router.route.name);
+  const active = $derived(router.route.name === 'project' ? 'overview' : router.route.name);
 </script>
 
 <nav aria-label={ui.t('nav.label')}>
@@ -29,6 +28,7 @@
     justify-content: space-around;
     background: var(--surface);
     border-top: 1px solid var(--line);
+    height: calc(var(--nav-h) + env(safe-area-inset-bottom));
     padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
     z-index: 10;
   }

@@ -7,6 +7,7 @@ Each guide covers one thing you want to get done.
 | Install the app on iPhone or desktop         | [Install](install.md)                     |
 | Start and end my workday                     | [Track your day](track-your-day.md)       |
 | Log which project I work on                  | [Switch projects](switch-projects.md)     |
+| Add, remove or bring back projects           | [Manage projects](manage-projects.md)     |
 | See hours left and my office-day quota       | [Hours left & quota](hours-and-quota.md)  |
 | Mark vacation, sick days or holidays         | [Days off](days-off.md)                   |
 | Clock in with an NFC tag or QR code          | [NFC & QR](automate-nfc-qr.md)            |

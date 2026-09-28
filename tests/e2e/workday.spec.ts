@@ -40,6 +40,75 @@ test('the workday bar fills and turns to overtime', async ({ app, page }) => {
   await expect(bar).toHaveAttribute('data-over', 'true');
 });
 
+test('swipe straight for home office, dip at the end for an office day', async ({ app, page }) => {
+  await app.open();
+  await app.english();
+  const bar = page.getByTestId('workday-bar');
+  await expect(bar).toHaveAttribute('data-state', 'idle');
+  await app.slide();
+  await expect(bar).toHaveAttribute('data-state', 'running');
+  await expect(bar).toHaveAttribute('data-mode', 'home');
+  await expect(page.getByTestId('today-mode')).toHaveText('Home office');
+
+  // while running the knob rests at the right end
+  const knob = await app.settled(page.getByTestId('toggle'));
+  const track = (await page.getByTestId('toggle').locator('..').boundingBox())!;
+  expect(knob.x + knob.width).toBeGreaterThan(track.x + track.width - 12);
+
+  await app.setTime('2026-09-28', '09:00');
+  await app.slide();
+  await expect(bar).toHaveAttribute('data-state', 'idle');
+  await expect(page.getByTestId('today-mode')).toHaveCount(0);
+  await app.slide({ dip: true });
+  await expect(bar).toHaveAttribute('data-mode', 'office');
+  await expect(page.getByTestId('today-mode')).toHaveText('Office');
+  await app.nav('overview');
+  await expect(page.getByTestId('quota-month')).toContainText('1 of');
+});
+
+test('lunch freezes the day and a swipe up resumes', async ({ app, page }) => {
+  await app.open();
+  await app.english();
+  const bar = page.getByTestId('workday-bar');
+  await app.slide();
+  await app.setTime('2026-09-28', '12:00');
+  await app.swipe('down');
+  await expect(bar).toHaveAttribute('data-state', 'lunch');
+  await expect(page.getByTestId('slot-lunch')).toBeVisible();
+  await expect(page.getByTestId('today-total')).toHaveText('4:00');
+  await app.setTime('2026-09-28', '12:30');
+  await expect(page.getByTestId('today-total')).toHaveText('4:00');
+
+  await app.swipe('up');
+  await expect(bar).toHaveAttribute('data-state', 'running');
+  await expect(page.getByTestId('slot-lunch')).toHaveCount(0);
+  await app.setTime('2026-09-28', '13:30');
+  await expect(page.getByTestId('today-total')).toHaveText('5:00');
+});
+
+test('stopping with the legal-break dip adds the break instead of deducting it', async ({
+  app,
+  page,
+}) => {
+  await app.open();
+  await app.english();
+  await app.slide();
+  await app.setTime('2026-09-28', '15:00');
+  await expect(page.getByTestId('today-total')).toHaveText('7:00');
+  await app.slide({ dip: true });
+  await expect(page.getByTestId('workday-bar')).toHaveAttribute('data-state', 'idle');
+  await expect(page.getByTestId('today-total')).toHaveText('7:00');
+});
+
+test('a holiday shows on Today when it is less than 4 days away', async ({ app, page }) => {
+  await app.setTime('2026-10-01', '08:00');
+  await app.open();
+  await app.english();
+  await expect(page.getByTestId('holiday')).toContainText('in 2 days');
+  await app.setTime('2026-09-28', '08:00');
+  await expect(page.getByTestId('holiday')).toHaveCount(0);
+});
+
 test.fixme('forgotten times can be added and edited (entry list removed from Today for now)', async ({
   app,
   page,

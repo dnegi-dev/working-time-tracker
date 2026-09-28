@@ -1,5 +1,5 @@
 export type Route =
-  | { name: 'today' | 'overview' | 'projects' | 'settings' }
+  | { name: 'today' | 'overview' | 'settings' }
   | { name: 'project'; id: string }
   | { name: 'do'; path: string };
 
@@ -8,7 +8,8 @@ export function parseRoute(hash: string): Route {
   if (h.startsWith('do/')) return { name: 'do', path: h.slice(3) };
   const [name, id] = h.split('/');
   if (name === 'project' && id) return { name: 'project', id };
-  if (name === 'overview' || name === 'projects' || name === 'settings') return { name };
+  if (name === 'overview' || name === 'projects') return { name: 'overview' };
+  if (name === 'settings') return { name };
   return { name: 'today' };
 }
 

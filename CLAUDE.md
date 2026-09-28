@@ -22,7 +22,7 @@ Read `docs/dev/ARCHITECTURE.md` before larger changes. Keep changes small and lo
 
 ## Working efficiently
 
-- Find code with `npm run -s codemap` (per file: lines, exports, props, test ids) instead of listing or grepping the tree. Read a file whole, once.
+- **Mandatory:** start every task with `npm run -s codemap` (per file: lines, exports, props, test ids) to find code. Never list or grep the tree to locate files; grep only inside files the codemap pointed to. Read a file whole, once.
 - Keep output short: `npm run check 2>&1 | tail -30`; while iterating run single tests (`npx vitest run <file>`, `npx playwright test <file> --project=desktop --reporter=line`).
 - Visual checks go through `/verify-ui` (subagent). Never take screenshots in the main conversation.
 - No subagents for code search: the codebase is ~7K lines.

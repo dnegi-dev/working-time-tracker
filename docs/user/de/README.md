@@ -7,6 +7,7 @@ Jede Anleitung beschreibt eine Aufgabe.
 | die App auf iPhone oder Desktop installieren           | [Installieren](installieren.md)                   |
 | meinen Arbeitstag starten und beenden                  | [Tag erfassen](tag-erfassen.md)                   |
 | erfassen, für welches Projekt ich arbeite              | [Projekt wechseln](projekt-wechseln.md)           |
+| Projekte anlegen, entfernen, zurückholen               | [Projekte verwalten](projekte-verwalten.md)       |
 | offene Stunden und Bürotage-Quote sehen                | [Stunden & Quote](stunden-und-quote.md)           |
 | Urlaub, Krankheit, Feiertage eintragen                 | [Freie Tage](freie-tage.md)                       |
 | per NFC-Tag oder QR-Code stempeln                      | [NFC & QR](automatisieren-nfc-qr.md)              |

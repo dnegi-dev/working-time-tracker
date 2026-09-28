@@ -8,7 +8,7 @@ async function seedDay(app: import('./fixtures.ts').AppPage) {
   await app.setTime('2026-09-28', '12:00');
   await app.slide();
   await app.addProject('Apollo');
-  await app.page.getByRole('link', { name: /Apollo/ }).click();
+  await app.openProject('Apollo');
   await app.page.getByTestId('note-input').fill('Export me');
   await app.page.getByTestId('note-input').press('Enter');
   await app.nav('settings');

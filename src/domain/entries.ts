@@ -35,8 +35,10 @@ export function breakDeduction(gross: number, taken: number, rule: BreakRule): n
   return Math.min(gross, Math.max(0, required - taken));
 }
 
+/** Tracked time minus the missing legal break; the break is only deducted once the day is stopped. */
 export function netMinutes(sorted: TimeEntry[], rule: BreakRule, now: Instant): number {
   const gross = sorted.reduce((sum, e) => sum + entryMinutes(e, now), 0);
+  if (sorted.some((e) => !e.end)) return gross;
   return gross - breakDeduction(gross, gapBreakMinutes(sorted, now), rule);
 }
 

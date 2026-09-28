@@ -12,6 +12,7 @@ import {
   periodRange,
   quotaStatus,
   requiredOfficeDays,
+  upcomingHoliday,
   weekday,
   workdays,
 } from '../../src/domain/index.ts';
@@ -53,6 +54,11 @@ describe('breaks', () => {
     const d = '2026-09-28';
     expect(netMinutes([entry(d, '08:00', undefined)], rule, at(d, '09:30'))).toBe(90);
   });
+  it('deducts the legal break only once the day is stopped', () => {
+    const d = '2026-09-28';
+    expect(netMinutes([entry(d, '08:00', undefined)], rule, at(d, '15:00'))).toBe(420);
+    expect(netMinutes([entry(d, '08:00', '15:00')], rule, at(d, '15:00'))).toBe(390);
+  });
 });
 
 describe('targets and balance', () => {
@@ -83,6 +89,20 @@ describe('targets and balance', () => {
     expect(p(480, 540)).toEqual({ ratio: 1, over: true });
     expect(p(0, 0)).toEqual({ ratio: 0, over: false });
     expect(p(0, 30)).toEqual({ ratio: 1, over: true });
+  });
+});
+
+describe('upcoming holiday', () => {
+  const names = new Map([['2026-10-03', 'German Unity Day']]);
+  it('shows a holiday from today up to three days ahead', () => {
+    expect(upcomingHoliday(names, '2026-10-03')).toEqual({
+      date: '2026-10-03',
+      name: 'German Unity Day',
+      inDays: 0,
+    });
+    expect(upcomingHoliday(names, '2026-09-30')?.inDays).toBe(3);
+    expect(upcomingHoliday(names, '2026-09-29')).toBeUndefined();
+    expect(upcomingHoliday(names, '2026-10-04')).toBeUndefined();
   });
 });
 

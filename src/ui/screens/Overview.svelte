@@ -1,105 +1,105 @@
 <script lang="ts">
-  import { balance, dateOf, formatMinutes, periodRange, quotaStatus } from '../../domain/index.ts';
+  import {
+    balance,
+    balanceBetween,
+    canArchive,
+    dateOf,
+    formatMinutes,
+    periodRange,
+    projectMinutesBetween,
+    quotaStatus,
+    recentProjectIds,
+    setArchived,
+    upsertProject,
+  } from '../../domain/index.ts';
   import { formatDate } from '../../i18n/index.ts';
-  import Progress from '../components/Progress.svelte';
+  import PoolField, { type PoolItem } from '../pool/PoolField.svelte';
+  import { POOL_PERIODS, type PoolPeriod, type PoolStats } from '../pool/StatsBubble.svelte';
   import { useUi } from '../state/context.svelte.ts';
+  import { router } from '../state/router.svelte.ts';
 
   const ui = useUi();
   const s = $derived(ui.s);
   const now = $derived(s.now.toISOString());
   const today = $derived(dateOf(now));
-  const periods = ['week', 'month', 'year'] as const;
-  const month = $derived(periodRange('month', today));
-  const holidays = $derived([...s.holidayNames].filter(([d]) => d >= month.from && d <= month.to));
+  let period = $state<PoolPeriod>('month');
+
+  const first = $derived(s.ds.entries.reduce((m, e) => (e.start < m ? e.start : m), now));
+  const range = $derived(
+    period === 'all' ? { from: dateOf(first), to: today } : periodRange(period, today),
+  );
+  const stats: PoolStats = $derived(
+    period === 'all'
+      ? {
+          balance: balanceBetween(s.ds, range.from, range.to, s.holidays, now),
+          since: formatDate(range.from, ui.locale, { month: 'short', year: 'numeric' }),
+        }
+      : {
+          balance: balance(s.ds, period, today, s.holidays, now),
+          quota: quotaStatus(s.ds, period, today, s.holidays),
+        },
+  );
+
+  const sums = $derived(projectMinutesBetween(s.ds, range.from, range.to, now));
+  const items: PoolItem[] = $derived.by(() => {
+    const total = [...sums.values()].reduce((a, b) => a + b, 0);
+    return recentProjectIds(s.ds)
+      .map((id) => {
+        const m = sums.get(id) ?? 0;
+        const share = total ? m / total : 0;
+        const name = s.ds.projects.find((p) => p.id === id)!.name;
+        return { id, name, share, sub: `${formatMinutes(m)} · ${Math.round(share * 100)}%` };
+      })
+      .sort((a, b) => b.share - a.share);
+  });
+  const resting = $derived(s.ds.projects.filter((p) => p.archived));
+
+  function nextPeriod() {
+    period = POOL_PERIODS[(POOL_PERIODS.indexOf(period) + 1) % POOL_PERIODS.length]!;
+  }
+
+  function rest(id: string) {
+    if (!canArchive(s.ds, id)) {
+      ui.notify(ui.t('pool.running'));
+      return false;
+    }
+    void ui.app.update((ds) => setArchived(ds, id, true));
+    return true;
+  }
+
+  function restore(id: string) {
+    const name = s.ds.projects.find((p) => p.id === id)?.name ?? '';
+    void ui.app.update((ds) => setArchived(ds, id, false));
+    ui.notify(ui.t('rest.restored', { name }));
+  }
+
+  function create(name: string) {
+    void ui.app.update((ds, _now, id) => upsertProject(ds, { id: id(), name, archived: false }));
+  }
 </script>
 
-<h1>{ui.t('nav.overview')}</h1>
-
-<h2>{ui.t('overview.hours')}</h2>
-<div class="card">
-  <table>
-    <thead>
-      <tr
-        ><th></th><th>{ui.t('col.target')}</th><th>{ui.t('col.worked')}</th><th
-          >{ui.t('overview.left')}</th
-        ></tr
-      >
-    </thead>
-    <tbody>
-      {#each periods as p (p)}
-        {@const b = balance(s.ds, p, today, s.holidays, now)}
-        <tr data-testid={`balance-${p}`}>
-          <th>{ui.t(`period.${p}`)}</th>
-          <td class="num">{formatMinutes(b.target)}</td>
-          <td class="num">{formatMinutes(b.worked)}</td>
-          <td class="num" class:over={b.remaining < 0}>{formatMinutes(b.remaining)}</td>
-        </tr>
-      {/each}
-    </tbody>
-  </table>
+<div class="overview">
+  <h1>{ui.t('nav.overview')}</h1>
+  <PoolField
+    {items}
+    {resting}
+    theme={s.ds.settings.restTheme}
+    {period}
+    {stats}
+    onperiod={nextPeriod}
+    onopen={(id) => router.go(`project/${id}`)}
+    oncreate={create}
+    onrest={rest}
+    onrestore={restore}
+  />
 </div>
 
-<h2>{ui.t('overview.quota')}</h2>
-{#each ['month', 'year'] as const as p (p)}
-  {@const q = quotaStatus(s.ds, p, today, s.holidays)}
-  <div class="card stack quota" data-testid={`quota-${p}`}>
-    <div class="row between">
-      <strong>{ui.t(`period.${p}`)}</strong>
-      <span class="num">{ui.t('quota.progress', { done: q.done, required: q.required })}</span>
-    </div>
-    <Progress value={q.done} max={q.required} label={ui.t('overview.quota')} />
-    <p class="muted" class:warn={!q.reachable}>
-      {q.needed === 0
-        ? ui.t('quota.reached')
-        : ui.t('quota.needed', { needed: q.needed, left: q.daysLeft, workdays: q.workdays })}
-    </p>
-  </div>
-{/each}
-
-{#if holidays.length}
-  <h2>{ui.t('overview.holidays')}</h2>
-  <ul class="plain">
-    {#each holidays as [d, name] (d)}
-      <li class="row between">
-        <span>{name}</span><span class="muted"
-          >{formatDate(d, ui.locale, { weekday: 'short', day: 'numeric', month: 'short' })}</span
-        >
-      </li>
-    {/each}
-  </ul>
-{/if}
-
 <style>
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  th,
-  td {
-    text-align: right;
-    padding: 6px 4px;
-  }
-  th:first-child {
-    text-align: left;
-  }
-  thead th {
-    color: var(--muted);
-    font-weight: 500;
-    font-size: 0.85rem;
-  }
-  .over {
-    color: var(--accent);
-  }
-  .between {
-    justify-content: space-between;
-  }
-  .quota + .quota {
-    margin-top: 12px;
-  }
-  .warn {
-    color: var(--warn);
-  }
-  p {
-    margin: 0;
+  /* App gives the overview a screen-high column; the field takes what the title leaves. */
+  .overview {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 </style>

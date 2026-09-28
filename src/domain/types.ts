@@ -78,12 +78,18 @@ export interface Settings {
   focusMinutes: number;
   /** Where the time of a bubble break goes. */
   breakCounts: 'before' | 'after' | 'pause';
+  /** Look of the place where removed projects rest. */
+  restTheme: RestTheme;
 }
+
+export type RestTheme = 'seabed' | 'sky' | 'attic';
 
 export interface Current {
   projectId?: string;
   placeId?: string;
   mode: Mode;
+  /** Set while the workday is stopped for lunch. */
+  lunchSince?: Instant;
 }
 
 export interface Dataset {

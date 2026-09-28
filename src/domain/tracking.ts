@@ -14,14 +14,21 @@ export function modeFor(ds: Dataset, placeId: string | undefined, fallback: Mode
   return ds.places.find((p) => p.id === placeId)?.mode ?? fallback;
 }
 
+/** Keep the current place if it fits the mode, else the first place with that mode. */
+export function placeForMode(ds: Dataset, mode: Mode): string | undefined {
+  const cur = ds.places.find((p) => p.id === ds.current.placeId);
+  if (cur?.mode === mode) return cur.id;
+  return ds.places.find((p) => p.mode === mode)?.id;
+}
+
 export function startEntry(ds: Dataset, opts: StartOptions, now: Instant, id: string): Dataset {
   if (runningEntry(ds)) return ds;
+  const placeId = opts.placeId ?? (opts.mode ? placeForMode(ds, opts.mode) : ds.current.placeId);
   const current: Current = {
     projectId: opts.projectId ?? ds.current.projectId,
-    placeId: opts.placeId ?? ds.current.placeId,
-    mode: opts.mode ?? ds.current.mode,
+    placeId,
+    mode: modeFor(ds, opts.placeId, opts.mode ?? ds.current.mode),
   };
-  current.mode = modeFor(ds, opts.placeId, current.mode);
   const entry: TimeEntry = { id, start: now, ...current, source: opts.source };
   return { ...ds, current, entries: [...ds.entries, entry] };
 }
