@@ -34,12 +34,13 @@ export class AppPage {
     return this.page.getByTestId(`nav-${name}`).click();
   }
 
-  /** Slide the workday knob to the other end (optionally dipping down there) and hold. */
-  async slide({ dip = false } = {}) {
+  /** Slide the workday knob to the other end (dipping down there, or on a diagonal) and hold. */
+  async slide({ dip = false, diagonal = false } = {}) {
     const k = await this.knob();
     const t = (await this.page.getByTestId('toggle').locator('..').boundingBox())!;
     const x = k.x < t.x + t.width / 2 ? t.x + t.width + 20 : t.x - 20;
-    const path = [{ x, y: k.y }, ...(dip ? [{ x, y: k.y + 50 }] : [])];
+    const low = { x, y: k.y + 50 };
+    const path = diagonal ? [low] : [{ x, y: k.y }, ...(dip ? [low] : [])];
     await this.holdKnob(k, path);
   }
 

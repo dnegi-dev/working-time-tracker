@@ -62,17 +62,15 @@
   };
 
   const hold = dragHold({
-    enter(key) {
-      targeted = !!key;
-      if (key) ui.platform.haptic('tick');
-    },
+    enter: (key) => (targeted = !!key),
+    haptic: ui.platform.haptic,
     confirm() {
       const it = items.find((i) => i.id === drag?.id);
       release();
-      if (it && onrest(it.id)) {
-        ui.platform.haptic('success');
-        gone = { name: it.name, n: (gone?.n ?? 0) + 1 };
-      }
+      if (!it) return;
+      const ok = onrest(it.id);
+      ui.platform.haptic(ok ? 'success' : 'warning');
+      if (ok) gone = { name: it.name, n: (gone?.n ?? 0) + 1 };
     },
   });
 
@@ -87,6 +85,7 @@
     if (!drag) return;
     const offset = { x: e.clientX - drag.start.x, y: e.clientY - drag.start.y };
     const moved = drag.moved || Math.hypot(offset.x, offset.y) > 8;
+    if (moved && !drag.moved) ui.platform.haptic('grab');
     drag = { ...drag, offset, moved };
     const i = shown.findIndex((it) => it.id === drag!.id);
     const p = layout.slots[i]!;
@@ -163,11 +162,12 @@
     position: relative;
     flex: 1;
     min-height: 0;
+    /* bleeds out of the page margin so the resting place runs edge to edge */
+    margin-inline: calc(-1 * var(--gutter, 0px));
     overflow: hidden;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
-    border-radius: var(--radius);
     background: radial-gradient(
       closest-side,
       color-mix(in srgb, var(--accent) 9%, transparent),

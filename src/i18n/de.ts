@@ -20,6 +20,8 @@ export const de: Record<keyof typeof en, string> = {
   'today.stop': 'Stopp',
   'today.workday': 'Arbeitstag',
   'today.resume': 'Weiter',
+  'today.goLunch': 'Mittag',
+  'today.goLegal': 'Stopp + {min} Min. Pause',
   'today.hintIdle': 'Wischen → Homeoffice · ↓ Büro',
   'today.hintRunning': 'Wischen ← Stopp · ↓ Mittag',
   'today.hintLunch': 'Mittag · ↑ wischen zum Weitermachen',

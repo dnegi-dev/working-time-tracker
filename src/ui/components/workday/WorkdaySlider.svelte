@@ -3,8 +3,16 @@
   import { HOLD_MS, dragHold } from '../../bubbles/gesture.ts';
   import { useUi } from '../../state/context.svelte.ts';
   import Knob from './Knob.svelte';
-  import Pocket from './Pocket.svelte';
-  import { DIP, resolve, rest, type SliderState, type Target } from './sliderGesture.ts';
+  import SliderPreview from './SliderPreview.svelte';
+  import {
+    DIP,
+    resolve,
+    rest,
+    turnAt,
+    type SliderState,
+    type Target,
+    type Turn,
+  } from './sliderGesture.ts';
 
   let {
     phase,
@@ -40,21 +48,22 @@
   /** After a confirm the knob stays put until the phase changes. */
   let heldIn = $state<SliderState>();
   let done = $state(false);
+  let turn = $state<Turn>();
+  /** The phase whose options are previewed: while pressed and a moment after a tap. */
+  let shown = $state<SliderState>();
+  let hide: ReturnType<typeof setTimeout> | undefined;
   let start = { x: 0, y: 0 };
 
   const max = $derived(Math.max(0, width - KNOB - 4));
   const home = $derived(rest(phase, max));
-  const r = $derived(resolve(phase, dx, dy, max, legal > 0));
+  const r = $derived(resolve(phase, dx, dy, max, legal > 0, turn));
   const live = $derived(dragging || heldIn === phase);
   const pos = $derived(live ? r : home);
-  const pocket = $derived(phase === 'lunch' ? 'lunch' : live ? r.pocket : undefined);
   const drag = $derived(max ? Math.abs(pos.x - home.x) / max : 0);
   const hold = dragHold({
-    enter(key) {
-      target = key as Target | undefined;
-      if (key) ui.platform.haptic('tick');
-    },
+    enter: (key) => (target = key as Target | undefined),
     confirm: (key) => finish(key as Target),
+    haptic: ui.platform.haptic,
   });
 
   $effect(() => {
@@ -65,15 +74,29 @@
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     start = { x: e.clientX, y: e.clientY };
     dx = dy = 0;
+    turn = turnAt(phase, 0, 0, max, legal > 0);
     heldIn = undefined;
     dragging = true;
+    clearTimeout(hide);
+    shown = phase;
+    ui.platform.haptic('grab');
   }
 
   function move(e: PointerEvent) {
     if (!dragging) return;
     dx = e.clientX - start.x;
     dy = e.clientY - start.y;
+    turn = turnAt(phase, dx, dy, max, legal > 0, turn);
     hold.over(r.target);
+  }
+
+  /** Letting go of a tap keeps the options on screen for a moment. */
+  function up() {
+    const tap = dragging && Math.hypot(dx, dy) < 6;
+    release();
+    if (!tap) return;
+    shown = phase;
+    hide = setTimeout(() => (shown = undefined), 2500);
   }
 
   function finish(t: Target) {
@@ -89,12 +112,13 @@
   function release() {
     hold.end();
     dragging = false;
+    shown = undefined;
   }
 </script>
 
 <div class="slider" class:done style:--tone={tone} style:--hold="{HOLD_MS}ms">
   <div class="track" bind:clientWidth={width}>
-    {@render children?.(drag)}
+    {@render children?.(shown === phase ? 1 : drag)}
     <div
       class="fill"
       class:dragging
@@ -103,9 +127,13 @@
       style:width="{Math.abs(pos.x - home.x) + KNOB + 4}px"
     ></div>
   </div>
-  {#if pocket}
-    <Pocket kind={pocket} active={pos.y >= DIP} label="+{legal}" />
-  {/if}
+  <SliderPreview
+    {phase}
+    {legal}
+    show={shown === phase}
+    pocket={phase === 'lunch' ? 'lunch' : live ? r.pocket : undefined}
+    dipped={pos.y >= DIP}
+  />
   <Knob
     icon={ICON[phase]}
     {label}
@@ -118,7 +146,7 @@
     active={phase !== 'idle'}
     onpointerdown={down}
     onpointermove={move}
-    onpointerup={release}
+    onpointerup={up}
   />
 </div>
 

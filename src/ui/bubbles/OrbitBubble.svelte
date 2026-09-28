@@ -129,11 +129,6 @@
   .targeted {
     z-index: 3;
   }
-  .targeted .bubble {
-    scale: 1.18;
-    border-color: var(--tone);
-    background: color-mix(in srgb, var(--tone) 18%, var(--surface));
-  }
   .name {
     max-width: 86%;
     font-size: 0.72rem;

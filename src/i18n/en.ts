@@ -19,6 +19,8 @@ export const en = {
   'today.stop': 'Stop',
   'today.workday': 'Workday',
   'today.resume': 'Resume',
+  'today.goLunch': 'Lunch',
+  'today.goLegal': 'Stop + {min} min break',
   'today.hintIdle': 'Swipe → home office · dip ↓ office',
   'today.hintRunning': 'Swipe ← stop · ↓ lunch',
   'today.hintLunch': 'Lunch · swipe ↑ to resume',

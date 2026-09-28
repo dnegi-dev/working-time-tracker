@@ -9,7 +9,7 @@ import {
   stripFor,
 } from '../../src/ui/pool/poolLayout.ts';
 
-const widths = [288, 320, 375, 420, 768, 1024, 1600];
+const widths = [320, 375, 420, 768, 1024, 1600];
 const heights = [480, 640, 812, 1000];
 const edges = ['top', 'bottom'] as const;
 

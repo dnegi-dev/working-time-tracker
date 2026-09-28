@@ -40,10 +40,12 @@
     min-height: 100dvh;
   }
   main {
+    --gutter: 16px;
     width: 100%;
     max-width: 640px;
     margin: 0 auto;
-    padding: calc(16px + env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));
+    padding: calc(16px + env(safe-area-inset-top)) var(--gutter)
+      calc(96px + env(safe-area-inset-bottom));
   }
   /* The overview fills the screen exactly, down to just above the tab bar. */
   main.wide {
@@ -61,6 +63,7 @@
     }
     main,
     main.wide {
+      --gutter: 32px;
       padding: 32px;
     }
   }

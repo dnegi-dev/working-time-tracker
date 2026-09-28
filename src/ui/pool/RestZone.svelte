@@ -74,12 +74,6 @@
     border-radius: 50%;
     background: color-mix(in srgb, var(--tone) 18%, var(--surface));
     border: 2px dashed var(--tone);
-    transition: scale 0.2s;
-  }
-  .targeted .hole {
-    scale: 1.25;
-    border-style: solid;
-    background: color-mix(in srgb, var(--tone) 32%, var(--surface));
   }
   svg {
     width: 60%;
@@ -92,9 +86,6 @@
   .spin {
     transform-origin: 12px 12px;
     animation: spin 3s linear infinite;
-  }
-  .targeted .spin {
-    animation-duration: 0.8s;
   }
   .label {
     position: absolute;

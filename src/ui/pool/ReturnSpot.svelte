@@ -42,10 +42,5 @@
     border-radius: 50%;
     border: 2px dashed var(--tone);
     background: color-mix(in srgb, var(--tone) 12%, var(--surface));
-    transition: scale 0.2s;
-  }
-  .active .ring {
-    scale: 1.2;
-    border-style: solid;
   }
 </style>
