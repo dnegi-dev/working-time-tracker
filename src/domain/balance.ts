@@ -36,3 +36,9 @@ export function balance(
   const { from, to } = periodRange(period, today);
   return balanceBetween(ds, from, to, holidays, now);
 }
+
+/** How full a period is: share of the target worked (capped at 1) and whether it's overtime. */
+export function dayProgress(b: Balance): { ratio: number; over: boolean } {
+  const ratio = b.target > 0 ? Math.min(1, b.worked / b.target) : b.worked > 0 ? 1 : 0;
+  return { ratio, over: b.remaining < 0 };
+}

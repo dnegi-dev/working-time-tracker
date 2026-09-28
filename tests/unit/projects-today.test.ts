@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { previousProjectId, projectMinutesOn, switchProject } from '../../src/domain/index.ts';
+import { projectMinutesOn, recentProjectIds, switchProject } from '../../src/domain/index.ts';
 import { at, dataset, entry } from './helpers.ts';
 
 const d = '2026-09-28';
@@ -19,14 +19,17 @@ describe('projects today', () => {
     expect(projectMinutesOn(ds, d, undefined, at(d, '10:30'))).toBe(0);
   });
 
-  it('finds the project worked on before the current one', () => {
-    let ds = dataset({ projects, entries: [entry(d, '08:00', undefined, { projectId: 'a' })] });
-    ds = { ...ds, current: { ...ds.current, projectId: 'a' } };
-    expect(previousProjectId(ds)).toBeUndefined();
+  it('lists active projects by most recent use', () => {
+    const all = [...projects, { id: 'd', name: 'd', archived: false }];
+    let ds = dataset({
+      projects: all,
+      entries: [entry(d, '08:00', undefined, { projectId: 'a' })],
+    });
+    expect(recentProjectIds(ds)).toEqual(['a', 'b', 'd']);
     ds = switchProject(ds, 'b', at(d, '09:00'), 'x', 'manual');
-    expect(previousProjectId(ds)).toBe('a');
-    ds = switchProject(ds, 'a', at(d, '10:00'), 'y', 'manual');
-    expect(previousProjectId(ds)).toBe('b');
+    expect(recentProjectIds(ds)).toEqual(['b', 'a', 'd']);
+    ds = switchProject(ds, 'c', at(d, '10:00'), 'y', 'manual');
+    expect(recentProjectIds(ds)).toEqual(['b', 'a', 'd']);
   });
 
   it('skips archived projects', () => {
@@ -34,6 +37,6 @@ describe('projects today', () => {
       projects,
       entries: [entry(d, '08:00', '09:00', { projectId: 'c' })],
     });
-    expect(previousProjectId(ds)).toBeUndefined();
+    expect(recentProjectIds(ds)).toEqual(['a', 'b']);
   });
 });

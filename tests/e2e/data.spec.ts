@@ -7,6 +7,8 @@ async function seedDay(app: import('./fixtures.ts').AppPage) {
   await app.slide();
   await app.setTime('2026-09-28', '12:00');
   await app.slide();
+  await app.addProject('Apollo');
+  await app.page.getByRole('link', { name: /Apollo/ }).click();
   await app.page.getByTestId('note-input').fill('Export me');
   await app.page.getByTestId('note-input').press('Enter');
   await app.nav('settings');
@@ -47,11 +49,12 @@ test('backup and restore round-trip', async ({ app, page }) => {
   ]);
   const backup = readFileSync(await download.path(), 'utf8');
 
-  // wipe the day, then restore
+  // work some more after the backup, then restore it
   await app.nav('today');
-  await page.getByTestId('entries').locator('li button').first().click();
-  await page.getByTestId('entries').getByRole('button', { name: 'Delete' }).click();
-  await expect(page.getByTestId('today-total')).toHaveText('0:00');
+  await app.slide();
+  await app.setTime('2026-09-28', '13:00');
+  await app.slide();
+  await expect(page.getByTestId('today-total')).toHaveText('5:00');
 
   await app.nav('settings');
   await page

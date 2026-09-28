@@ -9,3 +9,5 @@
    - on — switching splits the running entry, so each part keeps its own place.
 
 NFC tag per room: `wtt://switch-place?place=HQ%20%2F%203.14&source=nfc`.
+
+_Currently not on **Today** while the project bubbles are being reworked; it will come back._

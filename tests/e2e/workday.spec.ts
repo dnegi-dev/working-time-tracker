@@ -7,55 +7,43 @@ test('a full day: start, switch project, stop, totals and persistence', async ({
   await app.addProject('Zeus');
   await app.nav('today');
 
-  await page.getByTestId('project-above').click();
+  await app.dragTo('Apollo');
   await expect(page.getByTestId('project-current')).toHaveText('Apollo');
   await app.slide();
   await expect(page.getByTestId('toggle')).toHaveText('Stop');
 
   await app.setTime('2026-09-28', '10:00');
-  await page.getByTestId('project-above').click();
+  await app.dragTo('Zeus');
   await expect(page.getByTestId('project-current')).toHaveText('Zeus');
-  await expect(page.getByTestId('project-below')).toContainText('Apollo');
+  await expect(page.getByTestId('orbit').filter({ hasText: 'Apollo' })).toContainText('2:00');
   await app.setTime('2026-09-28', '12:30');
   await expect(page.getByTestId('project-total')).toHaveText('2:30');
   await app.slide();
 
   await expect(page.getByTestId('today-total')).toHaveText('4:30');
   await expect(page.getByTestId('today-remaining')).toContainText('3:30 left');
-  await expect(page.getByTestId('entries').locator('li')).toHaveCount(2);
 
   await page.reload();
   await expect(page.getByTestId('today-total')).toHaveText('4:30');
 });
 
-test('swiping the project wheel switches without a break', async ({ app, page }) => {
+test('the workday bar fills and turns to overtime', async ({ app, page }) => {
   await app.open();
   await app.english();
-  for (const name of ['Apollo', 'Zeus', 'Hera']) await app.addProject(name);
-  await app.nav('today');
-  const current = page.getByTestId('project-current');
-
-  await app.swipeProject('down');
-  await expect(current).toHaveText('Apollo');
+  const bar = page.getByTestId('workday-bar');
   await app.slide();
-  await app.setTime('2026-09-28', '09:00');
-  await app.swipeProject('down');
-  await expect(current).toHaveText('Zeus');
-  await expect(page.getByTestId('project-below')).toContainText('Apollo');
-  await expect(page.getByTestId('project-above')).toContainText('Hera');
-
-  await app.setTime('2026-09-28', '10:00');
-  await app.swipeProject('up');
-  await expect(current).toHaveText('Apollo');
-  await expect(page.getByTestId('project-below')).toContainText('Zeus');
-  await expect(page.getByTestId('project-total')).toHaveText('1:00');
-  await app.setTime('2026-09-28', '10:30');
-  await app.swipeProject('up');
-  await expect(current).toHaveText('Zeus');
-  await expect(page.getByTestId('project-total')).toHaveText('1:00');
+  await app.setTime('2026-09-28', '12:00');
+  await expect(bar.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '240');
+  await expect(bar).toHaveAttribute('data-over', 'false');
+  await app.setTime('2026-09-28', '17:30');
+  await expect(page.getByTestId('today-remaining')).toContainText('overtime');
+  await expect(bar).toHaveAttribute('data-over', 'true');
 });
 
-test('forgotten times can be added and edited', async ({ app, page }) => {
+test.fixme('forgotten times can be added and edited (entry list removed from Today for now)', async ({
+  app,
+  page,
+}) => {
   await app.open();
   await app.english();
   await page.getByTestId('add-entry').click();
@@ -68,7 +56,10 @@ test('forgotten times can be added and edited', async ({ app, page }) => {
   await expect(page.getByTestId('today-total')).toHaveText('0:00');
 });
 
-test('vacation removes the day target', async ({ app, page }) => {
+test.fixme('vacation removes the day target (day type removed from Today for now)', async ({
+  app,
+  page,
+}) => {
   await app.open();
   await app.english();
   await page.getByTestId('day-type').selectOption('vacation');

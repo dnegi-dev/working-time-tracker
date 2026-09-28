@@ -13,6 +13,7 @@ export function defaultSettings(locale: Settings['locale'] = 'de'): Settings {
     locale,
     openLinksIn: 'browser',
     storage: { kind: 'local' },
+    focusMinutes: 25,
   };
 }
 

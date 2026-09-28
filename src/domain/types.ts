@@ -74,6 +74,8 @@ export interface Settings {
   locale: 'de' | 'en';
   openLinksIn: 'browser' | 'app';
   storage: StorageSetting;
+  /** Length of one focus round (pomodoro) in minutes. */
+  focusMinutes: number;
 }
 
 export interface Current {

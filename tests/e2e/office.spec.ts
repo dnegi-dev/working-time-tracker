@@ -21,7 +21,10 @@ test('office quota follows region holidays (June 2026: Corpus Christi is a holid
   await expect(page.getByTestId('quota-month')).toContainText('0 of 14');
 });
 
-test('office days count and places set the mode', async ({ app, page }) => {
+test.fixme('office days count and places set the mode (place removed from Today for now)', async ({
+  app,
+  page,
+}) => {
   await app.open();
   await app.nav('settings');
   await page.getByTestId('place-building').fill('HQ');
@@ -34,7 +37,10 @@ test('office days count and places set the mode', async ({ app, page }) => {
   await expect(page.getByTestId('quota-month')).toContainText('1 of');
 });
 
-test('several places per day split the entry when enabled', async ({ app, page }) => {
+test.fixme('several places per day split the entry when enabled (place removed from Today for now)', async ({
+  app,
+  page,
+}) => {
   await app.open();
   await app.nav('settings');
   await page.getByTestId('multi-place').check();
@@ -48,17 +54,11 @@ test('several places per day split the entry when enabled', async ({ app, page }
   await expect(page.getByTestId('entries')).toContainText('Office');
 });
 
-test('notes for the day and for a project', async ({ app, page }) => {
+test('notes for a project', async ({ app, page }) => {
   await app.open();
-  await page.getByTestId('note-input').fill('Long meeting');
-  await page.getByTestId('note-input').press('Enter');
-  await expect(page.getByTestId('notes')).toContainText('Long meeting');
-
   await app.addProject('Apollo');
   await page.getByRole('link', { name: /Apollo/ }).click();
   await page.getByTestId('note-input').fill('Kickoff done');
   await page.getByTestId('note-input').press('Enter');
   await expect(page.getByTestId('notes')).toContainText('Kickoff done');
-  await app.nav('today');
-  await expect(page.getByTestId('notes')).not.toContainText('Kickoff done');
 });

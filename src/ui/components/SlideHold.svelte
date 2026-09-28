@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
+  import { HOLD_MS } from '../bubbles/gesture.ts';
   import { useUi } from '../state/context.svelte.ts';
 
   let {
@@ -7,16 +9,21 @@
     active = false,
     onconfirm,
     testid,
+    tone,
+    children,
   }: {
     label: string;
     hint: string;
     active?: boolean;
     onconfirm: () => void;
     testid: string;
+    /** Colour for track, knob and fill; defaults to the accent. */
+    tone?: string;
+    /** Content inside the track, behind the knob; gets how far the knob is dragged (0–1). */
+    children?: Snippet<[number]>;
   } = $props();
 
-  const HOLD_MS = 600;
-  const KNOB = 48;
+  const KNOB = 56;
   const ui = useUi();
   let track: HTMLDivElement;
   let x = $state(0);
@@ -65,9 +72,9 @@
   }
 </script>
 
-<div class="track" class:active class:done bind:this={track}>
+<div class="track" class:active class:done style:--tone={tone} bind:this={track}>
+  {@render children?.(x / max)}
   <div class="fill" class:dragging class:holding style:width="{x + KNOB + 4}px"></div>
-  <span class="label" style:opacity={1 - (x / max) * 1.4}>{hint}</span>
   <button
     class="knob"
     class:dragging
@@ -80,9 +87,9 @@
     data-testid={testid}
     aria-label={hint}
   >
-    <svg viewBox="0 0 48 48" aria-hidden="true">
-      <circle class="ring" cx="24" cy="24" r="21" pathLength="1" />
-      <path d="M20 16l8 8-8 8" />
+    <svg viewBox="0 0 56 56" aria-hidden="true">
+      <circle class="ring" cx="28" cy="28" r="25" pathLength="1" />
+      <path d="M24 19l9 9-9 9" />
     </svg>
     <span class="state">{label}</span>
   </button>
@@ -90,77 +97,54 @@
 
 <style>
   .track {
+    --t: var(--tone, var(--accent));
     position: relative;
-    height: 56px;
-    border-radius: 28px;
+    height: 64px;
+    border-radius: 32px;
     background: var(--surface);
-    border: 2px solid var(--accent);
+    border: 2px solid var(--t);
     overflow: hidden;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
-    transition: box-shadow 0.3s;
+    transition:
+      box-shadow 0.3s,
+      border-color 0.4s;
   }
   .track.done {
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 25%, transparent);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--t) 25%, transparent);
   }
   .fill {
     position: absolute;
     inset: 0 auto 0 0;
-    border-radius: 28px;
-    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    border-radius: 32px;
+    opacity: 0;
+    background: color-mix(in srgb, var(--t) 22%, transparent);
     transition:
       width 0.45s cubic-bezier(0.3, 1.5, 0.5, 1),
+      opacity 0.3s,
       background-color 0.6s linear;
   }
   .fill.dragging {
+    opacity: 1;
     transition: background-color 0.6s linear;
   }
   .fill.holding {
-    background: color-mix(in srgb, var(--accent) 55%, transparent);
-  }
-  .label {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    padding-left: 44px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    pointer-events: none;
-    color: transparent;
-    background: linear-gradient(
-        100deg,
-        var(--accent) 40%,
-        color-mix(in srgb, var(--accent) 25%, var(--surface)) 50%,
-        var(--accent) 60%
-      )
-      0 0 / 250% 100%;
-    background-clip: text;
-    -webkit-background-clip: text;
-    animation: shine 2.8s linear infinite;
-  }
-  @keyframes shine {
-    from {
-      background-position: 100% 0;
-    }
-    to {
-      background-position: -150% 0;
-    }
+    background: color-mix(in srgb, var(--t) 55%, transparent);
   }
   .knob {
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     min-height: 0;
     padding: 0;
     border-radius: 50%;
     border: none;
-    background: var(--accent);
+    background: var(--t);
     color: var(--accent-text);
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 40%, transparent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--t) 40%, transparent);
     transition: transform 0.45s cubic-bezier(0.3, 1.5, 0.5, 1);
     cursor: grab;
   }
@@ -194,13 +178,7 @@
   }
   .active .knob {
     background: var(--surface);
-    color: var(--accent);
-    border: 2px solid var(--accent);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .label {
-      animation: none;
-      color: var(--accent);
-    }
+    color: var(--t);
+    border: 2px solid var(--t);
   }
 </style>
