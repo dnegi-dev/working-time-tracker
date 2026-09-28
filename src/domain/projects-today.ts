@@ -13,11 +13,15 @@ export function projectMinutesOn(
     .reduce((sum, e) => sum + entryMinutes(e, now), 0);
 }
 
-/** The active project worked on most recently before the current one. */
-export function previousProjectId(ds: Dataset): string | undefined {
-  const active = new Set(ds.projects.filter((p) => !p.archived).map((p) => p.id));
-  const latest = [...ds.entries]
-    .sort((a, b) => b.start.localeCompare(a.start))
-    .find((e) => e.projectId !== ds.current.projectId && active.has(e.projectId ?? ''));
-  return latest?.projectId;
+/** Active projects, most recently used first; never-used ones keep their order at the end. */
+export function recentProjectIds(ds: Dataset): string[] {
+  const last = new Map<string, Instant>();
+  for (const e of ds.entries) {
+    const seen = e.projectId && last.get(e.projectId);
+    if (e.projectId && (!seen || e.start > seen)) last.set(e.projectId, e.start);
+  }
+  return ds.projects
+    .filter((p) => !p.archived)
+    .map((p) => p.id)
+    .sort((a, b) => (last.get(b) ?? '').localeCompare(last.get(a) ?? ''));
 }

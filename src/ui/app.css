@@ -7,6 +7,7 @@
   --accent: #2f6f5e;
   --accent-text: #ffffff;
   --warn: #b4531f;
+  --calm: #3a7ca5;
   --radius: 14px;
   --gap: 16px;
   color-scheme: light dark;
@@ -24,6 +25,7 @@
     --accent: #6fbfa6;
     --accent-text: #0f1f1a;
     --warn: #f0935f;
+    --calm: #7db8dc;
   }
 }
 * {

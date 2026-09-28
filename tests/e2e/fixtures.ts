@@ -38,6 +38,7 @@ export class AppPage {
   async slide() {
     const knob = this.page.getByTestId('toggle');
     const before = await knob.textContent();
+    await knob.scrollIntoViewIfNeeded();
     const k = (await knob.boundingBox())!;
     const t = (await knob.locator('..').boundingBox())!;
     await this.page.mouse.move(k.x + k.width / 2, k.y + k.height / 2);
@@ -47,14 +48,20 @@ export class AppPage {
     await this.page.mouse.up();
   }
 
-  /** Drag the project wheel: 'down' brings the project above into the middle, 'up' the one below. */
-  async swipeProject(dir: 'down' | 'up') {
-    const box = (await this.page.getByTestId('project-current').boundingBox())!;
-    const x = box.x + box.width / 2;
-    const y = box.y + box.height / 2;
-    await this.page.mouse.move(x, y);
+  /** Drag the focus bubble onto a project (or the break) bubble and hold it there. */
+  async dragTo(target: string, { hold = true } = {}) {
+    const center = this.page.getByTestId('focus-bubble');
+    await center.scrollIntoViewIfNeeded();
+    const bubble =
+      target === 'break'
+        ? this.page.getByTestId('orbit-break')
+        : this.page.getByTestId('orbit').filter({ hasText: target });
+    const a = (await center.boundingBox())!;
+    const b = (await bubble.boundingBox())!;
+    await this.page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
     await this.page.mouse.down();
-    await this.page.mouse.move(x, y + (dir === 'down' ? 60 : -60), { steps: 6 });
+    await this.page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 8 });
+    await this.page.waitForTimeout(hold ? 900 : 150);
     await this.page.mouse.up();
   }
 

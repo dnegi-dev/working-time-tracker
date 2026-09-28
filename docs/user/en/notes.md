@@ -7,3 +7,5 @@
 - By link: `wtt://add-note?text=Deploy%20done&project=Apollo`.
 
 Tap **×** to delete a note.
+
+_Day notes are currently not on **Today** while the project bubbles are being reworked; they will come back._

@@ -57,6 +57,18 @@
     />
     {ui.t('settings.breakRule', { a: st.breakRule.after6h, b: st.breakRule.after9h })}
   </label>
+  <label class="field">
+    {ui.t('settings.focusMinutes')}
+    <input
+      type="number"
+      min="5"
+      max="180"
+      step="5"
+      value={st.focusMinutes}
+      onchange={(e) => set({ focusMinutes: Number((e.target as HTMLInputElement).value) || 25 })}
+      data-testid="focus-minutes"
+    />
+  </label>
 </div>
 
 <style>

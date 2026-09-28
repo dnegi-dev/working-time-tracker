@@ -3,6 +3,7 @@ import {
   addDays,
   balance,
   breakDeduction,
+  dayProgress,
   dayTarget,
   eachDay,
   formatMinutes,
@@ -73,6 +74,15 @@ describe('targets and balance', () => {
       remaining: 240,
     });
     expect(balance(ds, 'week', d, holidays, now).target).toBe(5 * 480);
+  });
+  it('turns worked time into progress and flags overtime', () => {
+    const p = (target: number, worked: number) =>
+      dayProgress({ target, worked, remaining: target - worked });
+    expect(p(480, 240)).toEqual({ ratio: 0.5, over: false });
+    expect(p(480, 480)).toEqual({ ratio: 1, over: false });
+    expect(p(480, 540)).toEqual({ ratio: 1, over: true });
+    expect(p(0, 0)).toEqual({ ratio: 0, over: false });
+    expect(p(0, 30)).toEqual({ ratio: 1, over: true });
   });
 });
 
