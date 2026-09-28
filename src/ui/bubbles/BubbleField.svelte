@@ -22,7 +22,9 @@
     center,
     items,
     showBreak,
+    queued,
     onpick,
+    onqueue,
   }: {
     center: {
       name: string;
@@ -31,10 +33,14 @@
       total: number;
       mode: FocusState;
       breakMinutes: number;
+      next?: string;
     };
     items: OrbitItem[];
     showBreak: boolean;
+    queued?: string;
     onpick: (key: string) => void;
+    /** During a break: a project bubble was held inside the centre. */
+    onqueue: (key: string) => void;
   } = $props();
 
   const ui = useUi();
@@ -42,18 +48,22 @@
   let h = $state(0);
   let offset = $state<Point>({ x: 0, y: 0 });
   let target = $state<string>();
-  let dragging = $state(false);
+  /** What is being dragged: the centre bubble or (during a break) a project bubble. */
+  let source = $state<string>();
   let start: Point | undefined;
 
   const r = $derived(radii(w, h));
   const home = $derived({ x: w / 2, y: h / 2 });
   const layout = $derived(orbitSlots(items.length, w, h));
+  const moved = (key: string, p: Point) =>
+    source === key ? { x: p.x + offset.x, y: p.y + offset.y } : p;
+  const slots = $derived(items.map((it, i) => moved(it.key, layout.slots[i]!)));
   const spots = $derived([
-    ...items.map((it, i) => ({ key: it.key, at: layout.slots[i]! })),
+    ...items.map((it, i) => ({ key: it.key, at: slots[i]! })),
     ...(showBreak ? [{ key: 'break', at: layout.brk }] : []),
   ]);
   const targets = $derived(spots.filter((s) => s.key !== 'more'));
-  const pos = $derived({ x: home.x + offset.x, y: home.y + offset.y });
+  const pos = $derived(moved('center', home));
   const full = $derived(center.mode === 'running' && !!center.focus?.full);
 
   const hold = dragHold({
@@ -62,30 +72,44 @@
       if (key) ui.platform.haptic('tick');
     },
     confirm(key) {
+      const from = source;
       ui.platform.haptic('success');
       release();
-      onpick(key);
+      if (key === 'queue' && from) onqueue(from);
+      else onpick(key);
     },
   });
 
   function down(e: PointerEvent) {
-    if (!(e.target as Element).closest('.focus')) return;
+    const el = e.target as Element;
+    const key = el.closest('.focus')
+      ? 'center'
+      : center.mode === 'break'
+        ? el.closest<HTMLElement>('[data-key]')?.dataset.key
+        : undefined;
+    if (!key) return;
     (e.currentTarget as Element).setPointerCapture(e.pointerId);
     start = { x: e.clientX, y: e.clientY };
-    dragging = true;
+    source = key;
   }
 
   function move(e: PointerEvent) {
-    if (!start) return;
-    const x = Math.min(w, Math.max(0, home.x + e.clientX - start.x));
-    const y = Math.min(h, Math.max(0, home.y + e.clientY - start.y));
-    offset = { x: x - home.x, y: y - home.y };
-    hold.over(hitTarget({ x, y }, targets, r.orbit));
+    if (!start || !source) return;
+    const origin =
+      source === 'center' ? home : layout.slots[items.findIndex((i) => i.key === source)]!;
+    const x = Math.min(w, Math.max(0, origin.x + e.clientX - start.x));
+    const y = Math.min(h, Math.max(0, origin.y + e.clientY - start.y));
+    offset = { x: x - origin.x, y: y - origin.y };
+    hold.over(
+      source === 'center'
+        ? hitTarget({ x, y }, targets, r.orbit)
+        : hitTarget({ x, y }, [{ key: 'queue', at: home }], r.center - 10),
+    );
   }
 
   function release() {
     start = undefined;
-    dragging = false;
+    source = undefined;
     offset = { x: 0, y: 0 };
     hold.end();
   }
@@ -107,7 +131,10 @@
     <Oxygen active={center.mode === 'running'} from={home} r={r.center} />
     {#each items as it, i (it.key)}
       <OrbitBubble
-        at={layout.slots[i]!}
+        at={slots[i]!}
+        id={it.kind === 'project' ? it.key : undefined}
+        queued={queued === it.key}
+        dragging={source === it.key}
         r={r.orbit}
         index={i}
         kind={it.kind}
@@ -132,7 +159,13 @@
         onactivate={() => onpick('break')}
       />
     {/if}
-    <FocusBubble {...center} at={pos} r={r.center} {dragging} />
+    <FocusBubble
+      {...center}
+      at={pos}
+      r={r.center}
+      dragging={source === 'center'}
+      targeted={target === 'queue'}
+    />
   {/if}
 </div>
 

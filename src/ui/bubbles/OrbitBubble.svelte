@@ -1,4 +1,5 @@
 <script lang="ts">
+  import HoldRing from './HoldRing.svelte';
   import type { Point } from './layout.ts';
 
   let {
@@ -8,7 +9,10 @@
     kind,
     label,
     sub,
+    id,
     targeted = false,
+    queued = false,
+    dragging = false,
     glow = false,
     still = false,
     options = [],
@@ -21,7 +25,10 @@
     kind: 'project' | 'break' | 'more';
     label: string;
     sub?: string;
+    id?: string;
     targeted?: boolean;
+    queued?: boolean;
+    dragging?: boolean;
     glow?: boolean;
     still?: boolean;
     options?: { id: string; name: string }[];
@@ -51,9 +58,13 @@
   <button
     class="orbit {kind}"
     class:targeted
+    class:queued
+    class:dragging
     class:glow
     class:still
     {style}
+    data-key={id}
+    data-queued={queued}
     data-testid={kind === 'break' ? 'orbit-break' : 'orbit'}
     onclick={(e) => e.detail === 0 && onactivate()}
   >
@@ -65,9 +76,7 @@
       {/if}
       <span class="name">{label}</span>
       {#if sub}<span class="sub num">{sub}</span>{/if}
-      <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
-        <circle cx="50" cy="50" r="47" pathLength="1" />
-      </svg>
+      <HoldRing active={targeted} />
     </span>
   </button>
 {/if}
@@ -149,24 +158,17 @@
     stroke-width: 2.4;
     stroke-linecap: round;
   }
-  .ring {
-    position: absolute;
-    inset: -6px;
-    width: calc(100% + 12px);
-    height: calc(100% + 12px);
-    fill: none;
-    stroke: var(--tone);
-    stroke-width: 4;
-    stroke-linecap: round;
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    opacity: 0;
-    transform: rotate(-90deg);
+  .queued .bubble {
+    border: 2.5px solid var(--tone);
+    background: color-mix(in srgb, var(--tone) 12%, var(--surface));
   }
-  .targeted .ring {
-    opacity: 1;
-    stroke-dashoffset: 0;
-    transition: stroke-dashoffset 0.6s linear;
+  .dragging {
+    z-index: 3;
+    transition: none;
+  }
+  .dragging .bubble {
+    animation: none;
+    scale: 0.92;
   }
   .more select {
     position: absolute;

@@ -1,14 +1,17 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import {
+    breakActive,
     dateOf,
+    endBreak,
     focusProgress,
     formatMinutes,
     minutesBetween,
     projectMinutesOn,
+    queueNext,
     recentProjectIds,
     runningEntry,
-    streakStart,
+    startBreak,
     switchProject,
   } from '../../domain/index.ts';
   import { useUi } from '../state/context.svelte.ts';
@@ -22,10 +25,11 @@
   const today = $derived(dateOf(now));
   const running = $derived(!!runningEntry(ds));
   let brk = $state<BreakState>(loadBreak());
-  const streak = $derived(streakStart(ds));
-  // A break only counts while the streak it was taken in is still running.
-  const onBreak = $derived(!!(streak && brk.since && brk.since >= streak));
+  const onBreak = $derived(breakActive(ds, brk.since));
   const mode = $derived(onBreak ? 'break' : running ? 'running' : 'stopped');
+  const breakMinutes = $derived(onBreak && brk.since ? minutesBetween(brk.since, now) : 0);
+  // During a break the centre speaks for the project the break was taken from.
+  const shownId = $derived(onBreak ? (brk.from ?? ds.current.projectId) : ds.current.projectId);
   const focus = $derived(focusProgress(ds, now, brk.lastEnd));
   const current = $derived(ds.current.projectId);
   const others = $derived(recentProjectIds(ds).filter((id) => onBreak || id !== current));
@@ -67,31 +71,43 @@
     saveBreak(s);
   }
 
-  /** Break keeps the project running; the next pick ends it and starts a fresh focus round. */
+  /** A break ends with the next pick, which also starts a fresh focus round. */
   function pick(key: string) {
     const t = new Date().toISOString();
+    const since = brk.since;
     if (key === 'break') {
-      if (running && !onBreak) setBreak({ since: t, lastEnd: brk.lastEnd });
-    } else {
-      if (onBreak) setBreak({ lastEnd: t });
-      if (key !== current) {
-        void ui.app.update((d, at, newId) => switchProject(d, key, at, newId(), 'manual'));
-      }
+      if (!running || onBreak) return;
+      setBreak({ since: t, from: current, lastEnd: brk.lastEnd });
+      void ui.app.update((d) => startBreak(d, t));
+    } else if (onBreak && since) {
+      setBreak({ lastEnd: t });
+      void ui.app.update((d, at, newId) => endBreak(d, since, key, at, newId(), 'manual'));
+    } else if (key !== current) {
+      void ui.app.update((d, at, newId) => switchProject(d, key, at, newId(), 'manual'));
     }
     ui.app.tick();
+  }
+
+  /** During a break: remember which project comes next. */
+  function queue(key: string) {
+    setBreak({ ...brk, next: key });
+    void ui.app.update((d) => queueNext(d, key));
   }
 </script>
 
 <BubbleField
   center={{
-    name: name(current),
-    minutes: minutes(current),
+    name: name(shownId),
+    minutes: minutes(shownId) - (ds.settings.breakCounts === 'after' ? breakMinutes : 0),
     focus,
     total: ds.settings.focusMinutes,
     mode,
-    breakMinutes: onBreak && brk.since ? minutesBetween(brk.since, now) : 0,
+    breakMinutes,
+    next: onBreak && brk.next ? name(brk.next) : undefined,
   }}
   {items}
   showBreak={running && !onBreak}
+  queued={onBreak ? brk.next : undefined}
   onpick={pick}
+  onqueue={queue}
 />

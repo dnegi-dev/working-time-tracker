@@ -65,6 +65,18 @@ export class AppPage {
     await this.page.mouse.up();
   }
 
+  /** During a break: drag a project bubble into the centre and hold it there. */
+  async queue(name: string) {
+    const bubble = this.page.getByTestId('orbit').filter({ hasText: name });
+    const a = (await bubble.boundingBox())!;
+    const b = (await this.page.getByTestId('focus-bubble').boundingBox())!;
+    await this.page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+    await this.page.mouse.down();
+    await this.page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 8 });
+    await this.page.waitForTimeout(900);
+    await this.page.mouse.up();
+  }
+
   async addProject(name: string) {
     await this.nav('projects');
     await this.page.getByTestId('project-name').fill(name);

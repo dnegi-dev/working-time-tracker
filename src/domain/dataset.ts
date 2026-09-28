@@ -14,6 +14,7 @@ export function defaultSettings(locale: Settings['locale'] = 'de'): Settings {
     openLinksIn: 'browser',
     storage: { kind: 'local' },
     focusMinutes: 25,
+    breakCounts: 'before',
   };
 }
 
