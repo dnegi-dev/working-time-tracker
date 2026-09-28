@@ -10,3 +10,5 @@ export * from './edit.ts';
 export * from './projects-today.ts';
 export * from './focus.ts';
 export * from './breaks.ts';
+export * from './workday.ts';
+export * from './project-stats.ts';

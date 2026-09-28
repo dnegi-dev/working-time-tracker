@@ -15,6 +15,7 @@ export function defaultSettings(locale: Settings['locale'] = 'de'): Settings {
     storage: { kind: 'local' },
     focusMinutes: 25,
     breakCounts: 'before',
+    restTheme: 'seabed',
   };
 }
 

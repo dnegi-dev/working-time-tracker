@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  placeForMode,
   runningEntry,
   splitAtMidnight,
   startEntry,
@@ -34,6 +35,28 @@ describe('tracking', () => {
       'a',
     );
     expect(ds.entries[0]).toMatchObject({ placeId: 'hq', mode: 'office', source: 'nfc' });
+  });
+
+  it('picks a place that fits the mode', () => {
+    const ds = dataset({ places, current: { mode: 'home', placeId: 'home' } });
+    expect(placeForMode(ds, 'home')).toBe('home');
+    expect(placeForMode(ds, 'office')).toBe('hq');
+    expect(placeForMode(dataset(), 'office')).toBeUndefined();
+    const hq2 = { id: 'hq2', building: 'HQ2', mode: 'office' as const };
+    const inHq2 = dataset({
+      places: [...places, hq2],
+      current: { mode: 'office', placeId: 'hq2' },
+    });
+    expect(placeForMode(inHq2, 'office')).toBe('hq2');
+  });
+
+  it('starting with a mode drops a place of the other mode', () => {
+    const base = dataset({ places, current: { mode: 'home', placeId: 'home' } });
+    const office = startEntry(base, { mode: 'office', source: 'api' }, at(d, '08:00'), 'a');
+    expect(office.entries[0]).toMatchObject({ placeId: 'hq', mode: 'office' });
+    const bare = dataset({ places: places.slice(1), current: { mode: 'home', placeId: 'home' } });
+    const noPlace = startEntry(bare, { mode: 'office', source: 'api' }, at(d, '08:00'), 'a');
+    expect(noPlace.current).toMatchObject({ placeId: undefined, mode: 'office' });
   });
 
   it('splits the running entry on project switch', () => {

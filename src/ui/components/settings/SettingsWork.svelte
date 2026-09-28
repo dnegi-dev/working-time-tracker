@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { updateSettings, type Settings } from '../../../domain/index.ts';
+  import { updateSettings, type RestTheme, type Settings } from '../../../domain/index.ts';
   import { formatDate } from '../../../i18n/index.ts';
   import { useUi } from '../../state/context.svelte.ts';
 
+  const REST_THEMES: RestTheme[] = ['seabed', 'sky', 'attic'];
   const ui = useUi();
   const st = $derived(ui.s.ds.settings);
   // 2024-01-01 is a Monday
@@ -80,6 +81,16 @@
       <option value="before">{ui.t('settings.breakBefore')}</option>
       <option value="after">{ui.t('settings.breakAfter')}</option>
       <option value="pause">{ui.t('settings.breakPause')}</option>
+    </select>
+  </label>
+  <label class="field">
+    {ui.t('settings.restTheme')}
+    <select
+      value={st.restTheme}
+      onchange={(e) => set({ restTheme: (e.target as HTMLSelectElement).value as RestTheme })}
+      data-testid="rest-theme"
+    >
+      {#each REST_THEMES as t (t)}<option value={t}>{ui.t(`rest.${t}`)}</option>{/each}
     </select>
   </label>
 </div>

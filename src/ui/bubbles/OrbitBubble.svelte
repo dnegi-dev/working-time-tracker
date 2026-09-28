@@ -92,10 +92,8 @@
     min-height: 0;
     border: none;
     background: none;
-    transition: transform 0.5s ease;
-  }
-  .orbit.break {
-    --tone: var(--calm);
+    transition: 0.6s var(--spring);
+    transition-property: transform, width, height;
   }
   .bubble {
     position: relative;
@@ -119,6 +117,7 @@
     animation: none;
   }
   .break .bubble {
+    --tone: var(--calm);
     border-style: dashed;
     background: color-mix(in srgb, var(--tone) 10%, var(--surface));
   }
@@ -190,6 +189,9 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
+    .orbit {
+      transition: none;
+    }
     .bubble {
       animation: none;
     }

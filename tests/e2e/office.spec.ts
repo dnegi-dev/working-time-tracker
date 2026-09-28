@@ -13,7 +13,8 @@ test('office quota follows region holidays (June 2026: Corpus Christi is a holid
   await app.nav('overview');
   // 22 weekdays − 1 holiday = 21 × 3/5 = 12.6 → 13
   await expect(page.getByTestId('quota-month')).toContainText('0 of 13');
-  await expect(page.getByText('Fronleichnam')).toBeVisible();
+  // the overview counts holidays but no longer lists them
+  await expect(page.getByText('Fronleichnam')).toHaveCount(0);
 
   await app.nav('settings');
   await page.getByTestId('region').selectOption('DE-BE');
@@ -57,7 +58,7 @@ test.fixme('several places per day split the entry when enabled (place removed f
 test('notes for a project', async ({ app, page }) => {
   await app.open();
   await app.addProject('Apollo');
-  await page.getByRole('link', { name: /Apollo/ }).click();
+  await app.openProject('Apollo');
   await page.getByTestId('note-input').fill('Kickoff done');
   await page.getByTestId('note-input').press('Enter');
   await expect(page.getByTestId('notes')).toContainText('Kickoff done');
