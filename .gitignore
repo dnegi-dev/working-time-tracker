@@ -6,3 +6,6 @@ playwright-report
 ios/App/Pods
 ios/App/App/public
 .DS_Store
+ios/App/build-sim
+.claude/handoff.md
+.claude/settings.local.json

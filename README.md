@@ -4,7 +4,7 @@ Minimal app to track daily working hours, projects, the office/home-office quota
 
 - **User guide:** [English](docs/user/en/README.md) · [Deutsch](docs/user/de/README.md)
 - **Architecture & recipes:** [docs/dev/ARCHITECTURE.md](docs/dev/ARCHITECTURE.md) · [iOS build](docs/dev/ios.md) · [ADRs](docs/dev/adr)
-- **AI contributor rules:** [CLAUDE.md](CLAUDE.md)
+- **AI contributor rules:** [CLAUDE.md](CLAUDE.md) · [Claude workflow](docs/dev/claude-workflow.md)
 
 ```sh
 npm ci
