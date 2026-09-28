@@ -45,4 +45,6 @@ export interface Platform {
   redirectToApp(path: string): Promise<boolean>;
   /** Switch persistence; `pick` asks for a folder on the web. Returns false if cancelled. */
   useStorage(setting: StorageSetting, pick?: boolean): Promise<boolean>;
+  /** Tactile feedback for gestures. */
+  haptic(kind: 'tick' | 'success'): void;
 }

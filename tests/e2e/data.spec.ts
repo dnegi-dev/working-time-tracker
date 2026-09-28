@@ -4,9 +4,9 @@ import { expect, test } from './fixtures.ts';
 
 async function seedDay(app: import('./fixtures.ts').AppPage) {
   await app.open();
-  await app.page.getByTestId('toggle').click();
+  await app.slide();
   await app.setTime('2026-09-28', '12:00');
-  await app.page.getByTestId('toggle').click();
+  await app.slide();
   await app.page.getByTestId('note-input').fill('Export me');
   await app.page.getByTestId('note-input').press('Enter');
   await app.nav('settings');
