@@ -20,7 +20,9 @@
     "openapi:check": "npm run gen:openapi && git diff --exit-code public/api/openapi.json",
     "i18n": "node --experimental-strip-types scripts/check-i18n.ts",
     "build:ios": "BASE_PATH=./ npm run build && npx cap sync ios",
-    "gen:icons": "node --experimental-strip-types scripts/gen-icons.ts"
+    "gen:icons": "node --experimental-strip-types scripts/gen-icons.ts",
+    "codemap": "node --experimental-strip-types scripts/codemap.ts",
+    "ios:sim": "sh scripts/ios-sim.sh"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.2",

@@ -19,3 +19,13 @@ Read `docs/dev/ARCHITECTURE.md` before larger changes. Keep changes small and lo
 - Match existing style: small functions, few comments, `.ts` import extensions.
 - Tests: domain/application logic → `tests/unit`; user workflows → `tests/e2e/<task>.spec.ts`, using `data-testid` and the `AppPage` fixture.
 - User-facing behavior change → update the matching guide in `docs/user/en` and `docs/user/de` (task-focused: goal → steps → result).
+
+## Working efficiently
+
+- Find code with `npm run -s codemap` (per file: lines, exports, props, test ids) instead of listing or grepping the tree. Read a file whole, once.
+- Keep output short: `npm run check 2>&1 | tail -30`; while iterating run single tests (`npx vitest run <file>`, `npx playwright test <file> --project=desktop --reporter=line`).
+- Visual checks go through `/verify-ui` (subagent). Never take screenshots in the main conversation.
+- No subagents for code search: the codebase is ~7K lines.
+- iOS: `npm run -s ios:sim` builds and launches the simulator app.
+- Needs Node 22 or 24 (CI: 22). Node 25 breaks `npm run arch`.
+- Session workflow and signals: `docs/dev/claude-workflow.md`.
