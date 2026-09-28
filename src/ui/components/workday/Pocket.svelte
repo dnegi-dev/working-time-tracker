@@ -8,7 +8,8 @@
     kind,
     active = false,
     label,
-  }: { kind: PocketKind; active?: boolean; label?: string } = $props();
+    caption,
+  }: { kind: PocketKind; active?: boolean; label?: string; caption?: string } = $props();
 </script>
 
 <div
@@ -24,6 +25,7 @@
   {:else}
     <svg viewBox="0 0 24 24"><path d={ICONS[kind]} /></svg>
   {/if}
+  {#if caption}<span class="caption">{caption}</span>{/if}
 </div>
 
 <style>
@@ -63,6 +65,22 @@
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+  /* Under the circle, aligned to the screen side it sits on. */
+  .caption {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .left .caption {
+    right: auto;
+    left: 0;
   }
   .num {
     font-size: 0.95rem;

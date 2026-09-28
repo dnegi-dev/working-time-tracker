@@ -31,6 +31,10 @@
 
   const ui = useUi();
   let zoomed = $state(false);
+  const zoom = (on: boolean) => {
+    if (on !== zoomed) ui.platform.haptic('tick');
+    zoomed = on;
+  };
   let target = $state(false);
   let drag = $state<{ id: string; from: Point; start: Point; at: Point }>();
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- pinch bookkeeping, never rendered
@@ -44,10 +48,8 @@
   const r = $derived(zoomed ? LARGE : SMALL);
 
   const hold = dragHold({
-    enter(key) {
-      target = !!key;
-      if (key) ui.platform.haptic('tick');
-    },
+    enter: (key) => (target = !!key),
+    haptic: ui.platform.haptic,
     confirm() {
       const id = drag?.id;
       ui.platform.haptic('success');
@@ -70,12 +72,13 @@
     (e.currentTarget as Element).setPointerCapture(e.pointerId);
     const start = { x: e.clientX, y: e.clientY };
     drag = { id: items[i]!.id, from: spots[i]!, start, at: spots[i]! };
+    ui.platform.haptic('grab');
   }
 
   function move(e: PointerEvent) {
     if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 2 && spread && Math.abs(distance() - spread) > 40) {
-      zoomed = distance() > spread;
+      zoom(distance() > spread);
       spread = 0;
     }
     if (!drag) return;
@@ -96,7 +99,7 @@
   function wheel(e: WheelEvent) {
     if (!e.ctrlKey) return;
     e.preventDefault();
-    zoomed = e.deltaY < 0;
+    zoom(e.deltaY < 0);
   }
 </script>
 
@@ -119,14 +122,14 @@
   <RestScene {theme} {zoomed} />
   {#if zoomed}
     <ReturnSpot at={back} {theme} active={target} />
-    <button class="close" onclick={() => (zoomed = false)}>{ui.t('rest.close')}</button>
+    <button class="close" onclick={() => zoom(false)}>{ui.t('rest.close')}</button>
     {#if !items.length}<p class="empty">{ui.t('rest.empty')}</p>{/if}
   {:else}
     <button
       class="open"
       data-testid="rest-open"
       aria-label={ui.t('rest.open')}
-      onclick={() => (zoomed = true)}
+      onclick={() => zoom(true)}
     ></button>
   {/if}
   {#each items as it, i (it.id)}
@@ -144,42 +147,41 @@
 </div>
 
 <style>
-  /* Always as big as the field; the clip shows just the strip until zoomed in. */
+  /* Always as big as the field; the clip shows the strip (and art rising over it) until zoomed. */
   .rest {
+    --over: calc(var(--strip) * 0.8);
     position: absolute;
     inset: 0;
     z-index: 1;
-    border-radius: var(--radius);
     overflow: hidden;
+    pointer-events: none;
     transition: clip-path 0.45s cubic-bezier(0.3, 1.1, 0.5, 1);
   }
   .top {
-    clip-path: inset(0 0 calc(100% - var(--strip)) 0 round var(--radius) var(--radius) 0 0);
+    clip-path: inset(0 0 calc(100% - var(--strip) - var(--over)) 0);
   }
   .bottom {
-    clip-path: inset(calc(100% - var(--strip)) 0 0 0 round 0 0 var(--radius) var(--radius));
+    clip-path: inset(calc(100% - var(--strip) - var(--over)) 0 0 0);
   }
   .zoomed {
     z-index: 6;
-    clip-path: inset(0 0 0 0 round var(--radius));
+    clip-path: inset(0 0 0 0);
+    pointer-events: auto;
     background: var(--bg);
     touch-action: none;
   }
   .open {
     position: absolute;
-    left: 0;
-    right: 0;
+    inset: 0 0 auto;
     height: var(--strip);
     min-height: 0;
     border: none;
     background: none;
     cursor: zoom-in;
-  }
-  .top .open {
-    top: 0;
+    pointer-events: auto;
   }
   .bottom .open {
-    bottom: 0;
+    inset: auto 0 0;
   }
   .close {
     position: absolute;

@@ -67,10 +67,8 @@
   const full = $derived(center.mode === 'running' && !!center.focus?.full);
 
   const hold = dragHold({
-    enter(key) {
-      target = key;
-      if (key) ui.platform.haptic('tick');
-    },
+    enter: (key) => (target = key),
+    haptic: ui.platform.haptic,
     confirm(key) {
       const from = source;
       ui.platform.haptic('success');
@@ -91,6 +89,7 @@
     (e.currentTarget as Element).setPointerCapture(e.pointerId);
     start = { x: e.clientX, y: e.clientY };
     source = key;
+    ui.platform.haptic('grab');
   }
 
   function move(e: PointerEvent) {

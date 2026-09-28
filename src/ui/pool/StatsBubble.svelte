@@ -40,7 +40,10 @@
   data-testid="stats-bubble"
   data-period={period}
   aria-label={ui.t('pool.period')}
-  onclick={onnext}
+  onclick={() => {
+    ui.platform.haptic('tick');
+    onnext();
+  }}
 >
   <span class="body">
     <Water level={fill?.ratio ?? 0} moving={false} />

@@ -66,6 +66,27 @@ test('swipe straight for home office, dip at the end for an office day', async (
   await expect(page.getByTestId('quota-month')).toContainText('1 of');
 });
 
+test('a diagonal swipe into the corner starts home office, not an office day', async ({
+  app,
+  page,
+}) => {
+  await app.open();
+  await app.english();
+  await app.slide({ diagonal: true });
+  await expect(page.getByTestId('workday-bar')).toHaveAttribute('data-mode', 'home');
+});
+
+test('tapping the knob previews where each direction leads', async ({ app, page }) => {
+  await app.open();
+  await app.english();
+  await page.getByTestId('toggle').click();
+  await expect(page.getByTestId('slider-preview')).toHaveText('Home office →');
+  await expect(page.getByTestId('slot-office')).toContainText('Office');
+  await expect(page.getByTestId('slider-preview')).toHaveCount(0, { timeout: 4000 });
+  await expect(page.getByTestId('slot-office')).toHaveCount(0);
+  await expect(page.getByTestId('workday-bar')).toHaveAttribute('data-state', 'idle');
+});
+
 test('lunch freezes the day and a swipe up resumes', async ({ app, page }) => {
   await app.open();
   await app.english();

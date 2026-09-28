@@ -62,8 +62,8 @@
       {breakMinutes}
       {next}
     />
+    <HoldRing active={targeted} />
   </div>
-  <HoldRing active={targeted} />
 </div>
 
 <style>
@@ -103,9 +103,6 @@
   .stopped .body {
     border-color: var(--line);
     box-shadow: none;
-  }
-  .targeted .body {
-    scale: 1.06;
   }
   .dragging .body {
     scale: 0.55;

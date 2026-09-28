@@ -7,6 +7,8 @@ export const MAX_SHOWN = 8;
 /** Largest ellipse the bubbles float on; smaller fields push them inwards like walls. */
 export const MAX_RX = 340;
 export const MAX_RY = 280;
+/** The field runs to the screen edge; bubbles keep off this margin on either side. */
+const EDGE = 16;
 
 /** Sky rests at the top; seabed and attic at the bottom. */
 export const restEdge = (t: RestTheme) => (t === 'sky' ? 'top' : 'bottom');
@@ -23,9 +25,10 @@ export function poolLayout(count: number, w: number, h: number, edge: 'top' | 'b
   const strip = stripFor(h);
   const top = edge === 'top' ? strip : 0;
   const fh = Math.max(0, h - strip);
-  const { center, orbit } = radii(w, fh);
+  const inner = Math.max(0, w - 2 * EDGE);
+  const { center, orbit } = radii(inner, fh);
   const wall = sizeFor(orbit, 1) + 4;
-  const rx = Math.min(MAX_RX, w / 2 - wall);
+  const rx = Math.min(MAX_RX, inner / 2 - wall);
   const ry = Math.min(MAX_RY, fh / 2 - wall);
   const mid = { x: w / 2, y: top + fh / 2 };
   const at = (deg: number): Point => ({

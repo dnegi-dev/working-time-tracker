@@ -32,6 +32,9 @@ export interface ReportTable {
 
 export type ExportFormat = 'md' | 'json' | 'csv' | 'xlsx';
 
+/** tick: light step · grab: picked something up · success/warning: done or refused. */
+export type HapticKind = 'tick' | 'grab' | 'success' | 'warning';
+
 /** Platform services the UI may use; implemented in src/main.ts from adapters. */
 export interface Platform {
   isNative: boolean;
@@ -46,5 +49,5 @@ export interface Platform {
   /** Switch persistence; `pick` asks for a folder on the web. Returns false if cancelled. */
   useStorage(setting: StorageSetting, pick?: boolean): Promise<boolean>;
   /** Tactile feedback for gestures. */
-  haptic(kind: 'tick' | 'success'): void;
+  haptic(kind: HapticKind): void;
 }
