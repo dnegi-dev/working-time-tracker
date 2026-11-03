@@ -60,6 +60,6 @@
     "qrcode": "^1.5.4",
     "swagger-ui-dist": "^5.33.0",
     "write-excel-file": "^4.1.1",
-    "zod": "^4.6.5"
+    "zod": "^4.6.6"
   }
 }
